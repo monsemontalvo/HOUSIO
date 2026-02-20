@@ -1,90 +1,99 @@
-import { generateToken } from '../lib/utils.js';
-import User from '../models/user.model.js';
-import bcrypt from 'bcryptjs';
+import { generateToken } from "../lib/utils.js";
+import User from "../models/user.model.js";
+import bcrypt from "bcryptjs";
 
 export const signup = async (req, res) => {
-    const { email, password, fullName } = req.body;
-    try {
-        if (!fullName || !email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
-        }
+  // 1. Recibimos los datos del formulario, INCLUYENDO EL ROL
+  const { fullName, email, password, role } = req.body;
 
-        if (password.length < 6) {
-            return res.status(400).json({ message: "Password must be at least 6 characters long" });
-        }
-
-        const user = await User.findOne({ email });
-
-        if (user) return res.status(400).json({ message: "Email already exists" });
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-
-        const newUser = new User({
-            email,
-            password: hashedPassword,
-            fullName
-        });
-
-        if (newUser) {
-            //Generar token JWT
-            generateToken(newUser._id, res);
-            await newUser.save();
-
-            res.status(201).json({
-                _id: newUser._id,
-                email: newUser.email,
-                fullName: newUser.fullName,
-                profilePicture: newUser.profilePicture,
-            });
-        } else {
-            res.status(400).json({ message: "Invalid user data" });
-        }
-
-    } catch (error) {
-        console.log("Error in signup controller:", error.message);
-        res.status(500).json({ message: "Internal server error" });
+  try {
+    // Validaciones básicas
+    if (!fullName || !email || !password) {
+      return res.status(400).json({ message: "Todos los campos son obligatorios" });
     }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "La contraseña debe tener al menos 6 caracteres" });
+    }
+
+    // Verificar si el usuario ya existe
+    const user = await User.findOne({ email });
+    if (user) return res.status(400).json({ message: "El correo electrónico ya está registrado" });
+
+    // Encriptar contraseña
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 2. Crear el usuario con el ROL seleccionado (o 'student' por defecto)
+    const newUser = new User({
+      fullName,
+      email,
+      password: hashedPassword,
+      role: role || "student", 
+    });
+
+    if (newUser) {
+      // Generar token JWT y guardarlo en cookie
+      generateToken(newUser._id, res);
+      await newUser.save();
+
+      // 3. Responder con los datos del usuario (incluyendo role)
+      res.status(201).json({
+        _id: newUser._id,
+        fullName: newUser.fullName,
+        email: newUser.email,
+        profilePic: newUser.profilePic,
+        role: newUser.role, 
+      });
+    } else {
+      res.status(400).json({ message: "Datos de usuario inválidos" });
+    }
+  } catch (error) {
+    console.log("Error en signup controller", error.message);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
 };
 
 export const login = async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        const user = await User.findOne({ email });
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
 
-        if (!user) {
-            return res.status(400).json({ message: "Invalid credentials" });
-        }
-
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);
-
-        if (!isPasswordCorrect) {
-            return res.status(400).json({ message: "Invalid credentials" });
-        }
-
-        generateToken(user._id, res);
-
-        res.status(200).json({
-            _id: user._id,
-            email: user.email,
-            fullName: user.fullName,
-            profilePicture: user.profilePicture,
-        });
-
-    } catch (error) {
-        console.log("Error in login controller:", error.message);
-        res.status(500).json({ message: "Internal server error" });
+    if (!user) {
+      return res.status(400).json({ message: "Credenciales inválidas" });
     }
-};
+
+    // Verificar contraseña
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Credenciales inválidas" });
+    }
+
+    // Generar token
+    generateToken(user._id, res);
+
+    // Responder con datos del usuario
+    res.status(200).json({
+      _id: user._id,
+      fullName: user.fullName,
+      email: user.email,
+      profilePic: user.profilePic,
+      role: user.role, // Importante devolver el rol aquí también
+    });
+  } catch (error) {
+    console.log("Error en login controller", error.message);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};3
 
 export const logout = (req, res) => {
-    try {
-        res.cookie("jwt", "", { maxAge: 0 });
-        res.status(200).json({ message: "Logged out successfully" });
-    } catch (error) {
-        console.log("Error in logout controller:", error.message);
-        res.status(500).json({ message: "Internal server error" });
-    }
+  try {
+    res.cookie("jwt", "", { maxAge: 0 }); // Borrar cookie
+    res.status(200).json({ message: "Sesión cerrada exitosamente" });
+  } catch (error) {
+    console.log("Error en logout controller", error.message);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
 };
 
 export const updateProfile = async (req, res) => {}
