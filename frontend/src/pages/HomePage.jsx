@@ -41,7 +41,7 @@ const HomePage = () => {
             Bienvenido a <br/> HOUSIO
           </h1>
           <p className="text-lg text-gray-200 leading-relaxed max-w-xs mx-auto font-light">
-            La plataforma segura para tu vida universitaria.
+            La plataforma de estudiantes para estudiantes.
           </p>
         </div>
 

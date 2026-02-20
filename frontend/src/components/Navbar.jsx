@@ -28,7 +28,7 @@ const Navbar = () => {
       <div className="flex-none gap-2">
         {authUser ? (
           <>
-            {/* Botón de Ayuda (Acceso rápido en la barra) */}
+            {/* Botón de Ayuda (Acceso rápido) */}
             <Link to="/help" className="btn btn-ghost btn-circle text-gray-400 hover:text-white hover:bg-white/10 tooltip tooltip-bottom" data-tip="Ayuda">
               <HelpCircle className="size-6" />
             </Link>
@@ -41,20 +41,19 @@ const Navbar = () => {
               </div>
             </button>
 
-            {/* Menú de Perfil (Dropdown) - YA SIN LA OPCIÓN DE AYUDA */}
+            {/* Menú de Perfil */}
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar border border-white/10">
                 <div className="w-10 rounded-full">
-                  <img alt="Perfil" src={authUser.profilePic || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} />
+                  <img alt="Perfil" src={authUser.profilePic || "/UserPlaceholder.png"} />
                 </div>
               </div>
               <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-neutral-900 border border-white/10 rounded-box w-52 text-gray-300">
                 <li>
-                  <a className="hover:text-orange-400 hover:bg-white/5">
+                  <Link to="/profile" className="hover:text-orange-400 hover:bg-white/5">
                     <User className="size-4" /> Editar Perfil
-                  </a>
+                  </Link>
                 </li>
-                {/* Aquí eliminé la opción de Ayuda que estaba antes */}
                 <li>
                   <button onClick={handleLogout} className="text-red-400 hover:bg-red-500/10 hover:text-red-300">
                     <LogOut className="size-4" /> Cerrar Sesión

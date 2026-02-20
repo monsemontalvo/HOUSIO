@@ -28,7 +28,7 @@ const StudentDashboard = ({ authUser }) => {
         <div className="text-white space-y-2">
           {/* Usamos la prop authUser aquí */}
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-            Hola, {authUser?.fullName?.split(' ')[0] || 'Estudiante'} 👋
+            Hola, {authUser?.fullName?.split(' ')[0] || 'Estudiante'} 
           </h1>
           <p className="text-lg text-gray-400 font-light">
             Encuentra el espacio perfecto para tu vida universitaria
