@@ -1,6 +1,7 @@
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
   // 1. Recibimos los datos del formulario, INCLUYENDO EL ROL
@@ -29,7 +30,7 @@ export const signup = async (req, res) => {
       fullName,
       email,
       password: hashedPassword,
-      role: role || "student", 
+      role: role || "student",
     });
 
     if (newUser) {
@@ -43,7 +44,7 @@ export const signup = async (req, res) => {
         fullName: newUser.fullName,
         email: newUser.email,
         profilePic: newUser.profilePic,
-        role: newUser.role, 
+        role: newUser.role,
       });
     } else {
       res.status(400).json({ message: "Datos de usuario inválidos" });
@@ -84,7 +85,7 @@ export const login = async (req, res) => {
     console.log("Error en login controller", error.message);
     res.status(500).json({ message: "Error interno del servidor" });
   }
-};3
+}; 3
 
 export const logout = (req, res) => {
   try {
@@ -96,4 +97,30 @@ export const logout = (req, res) => {
   }
 };
 
-export const updateProfile = async (req, res) => {}
+export const updateProfile = async (req, res) => {
+  try {
+    const { profilePic } = req.body;
+    const userId = req.user._id;
+
+    if (!profilePic) {
+      return res.status(400).json({ message: "La imagen de perfil es requerida" });
+    }
+
+    const uploadResult = await cloudinary.uploader.upload(profilePic);
+    const updatedUser = await User.findByIdAndUpdate(userId, { profilePic: uploadResult.secure_url }, { new: true });
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log("Error en updateProfile controller", error.message);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+export const checkAuth =  (req, res) => {
+  try {
+    res.status(200).json(req.user);
+  } catch (error) {
+    console.log("Error en checkAuth controller", error.message);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
