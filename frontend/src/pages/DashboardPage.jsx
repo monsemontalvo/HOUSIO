@@ -1,10 +1,11 @@
 import React from 'react';
 import { useAuthStore } from '../store/useAuthStore';
-import { 
-  Search, MapPin, Home, Wifi, Car, DollarSign, 
-  PawPrint, Zap, WashingMachine, Bus, 
-  Plus, Building, User, Edit, Trash2 
+import {
+  Search, MapPin, Home, Wifi, Car, DollarSign,
+  PawPrint, Zap, WashingMachine, Bus,
+  Plus, Building, User, Edit, Trash2
 } from 'lucide-react';
+import { Link } from 'react-router-dom'; // <--- IMPORTANTE
 
 // ======================================================================
 // 1. COMPONENTE DE ESTUDIANTE (DEFINIDO AFUERA)
@@ -22,19 +23,19 @@ const StudentDashboard = ({ authUser }) => {
 
   return (
     <div className="relative z-10 max-w-7xl mx-auto space-y-10">
-      
+
       {/* Encabezado */}
       <div className="flex flex-col items-center text-center space-y-8">
         <div className="text-white space-y-2">
           {/* Usamos la prop authUser aquí */}
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-            Hola, {authUser?.fullName?.split(' ')[0] || 'Estudiante'} 
+            Hola, {authUser?.fullName?.split(' ')[0] || 'Estudiante'}
           </h1>
           <p className="text-lg text-gray-400 font-light">
             Encuentra el espacio perfecto para tu vida universitaria
           </p>
         </div>
-        
+
         {/* Barra de Filtros */}
         <div className="w-full max-w-5xl bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl transition-all hover:bg-white/10">
           <div className="flex flex-col lg:flex-row gap-4 mb-4">
@@ -46,7 +47,7 @@ const StudentDashboard = ({ authUser }) => {
               <Search className="size-5" /> Buscar
             </button>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center mb-4">
             <div className="relative">
               <Home className="absolute left-3 top-2.5 text-gray-400 size-4 pointer-events-none" />
@@ -66,7 +67,7 @@ const StudentDashboard = ({ authUser }) => {
                 <option>$6,000+</option>
               </select>
             </div>
-             <div className="hidden md:block"></div> 
+            <div className="hidden md:block"></div>
           </div>
 
           <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide mask-fade-sides">
@@ -105,9 +106,9 @@ const StudentDashboard = ({ authUser }) => {
                 </div>
               </div>
               <div className="mt-auto">
-                <button className="w-full btn bg-white text-black hover:bg-gray-200 border-none rounded-xl font-bold shadow-md transition-all">
+                <Link to={`/product/${prop.id}`} className="w-full btn bg-white text-black hover:bg-gray-200 border-none rounded-xl font-bold shadow-md transition-all flex items-center justify-center">
                   Ver Detalles
-                </button>
+                </Link>
               </div>
             </div>
           </div>
@@ -123,7 +124,7 @@ const StudentDashboard = ({ authUser }) => {
 const LandlordDashboard = () => {
   return (
     <div className="relative z-10 max-w-7xl mx-auto space-y-10">
-      
+
       {/* Encabezado Arrendador */}
       <div className="flex flex-col md:flex-row justify-between items-end gap-4">
         <div className="text-white space-y-2">
@@ -199,7 +200,7 @@ const LandlordDashboard = () => {
                   </div>
                 </td>
               </tr>
-               <tr className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+              <tr className="border-b border-white/5 hover:bg-white/5 transition-colors group">
                 <td className="py-4">
                   <div className="flex items-center gap-3">
                     <div className="avatar">
@@ -239,7 +240,7 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen w-full bg-neutral-950 relative pt-24 px-4 pb-12 overflow-hidden">
-      
+
       {/* Luces Ambientales */}
       <div className="absolute top-0 left-[-10%] w-[500px] h-[500px] bg-orange-600/20 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-0 right-[-10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none"></div>
