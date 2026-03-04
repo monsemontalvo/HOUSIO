@@ -13,14 +13,13 @@ const Navbar = () => {
   };
 
   return (
-    // h-16 fija la altura, flex-nowrap evita que se bajen los iconos
     <div className="navbar fixed top-0 w-full z-50 px-2 sm:px-8 h-16 bg-neutral-950/80 backdrop-blur-md border-b border-white/10 shadow-lg transition-all flex-nowrap">
       
       {/* --- LOGO --- */}
       <div className="flex-1 min-w-0">
         <Link to={authUser ? "/dashboard" : "/"} className="flex items-center gap-2 sm:gap-3 group text-nowrap">
           <div className="bg-white/10 p-2 rounded-xl border border-white/10 shadow-sm group-hover:bg-white/20 transition-all shrink-0">
-            {/* Icono un poco más pequeño en móvil */}
+      
             <Home className="size-5 sm:size-6 text-orange-500" />
           </div>
           <span className="text-xl sm:text-2xl font-bold text-white tracking-tight truncate">
@@ -30,7 +29,6 @@ const Navbar = () => {
       </div>
 
       {/* --- ICONOS --- */}
-      {/* gap-0.5 en móvil para que quepan todos apretaditos pero bien */}
       <div className="flex-none flex items-center gap-0.5 sm:gap-2 flex-nowrap">
         {authUser ? (
           <>

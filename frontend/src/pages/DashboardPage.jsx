@@ -5,10 +5,10 @@ import {
   PawPrint, Zap, WashingMachine, Bus,
   Plus, Building, User, Edit, Trash2
 } from 'lucide-react';
-import { Link } from 'react-router-dom'; // <--- IMPORTANTE
+import { Link } from 'react-router-dom'; 
 
 // ======================================================================
-// 1. COMPONENTE DE ESTUDIANTE (DEFINIDO AFUERA)
+// 1. COMPONENTE DE INQUILINO 
 // ======================================================================
 const StudentDashboard = ({ authUser }) => {
   // Datos de ejemplo
@@ -27,7 +27,6 @@ const StudentDashboard = ({ authUser }) => {
       {/* Encabezado */}
       <div className="flex flex-col items-center text-center space-y-8">
         <div className="text-white space-y-2">
-          {/* Usamos la prop authUser aquí */}
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
             Hola, {authUser?.fullName?.split(' ')[0] || 'Estudiante'}
           </h1>
@@ -119,13 +118,13 @@ const StudentDashboard = ({ authUser }) => {
 };
 
 // ======================================================================
-// 2. COMPONENTE DE ARRENDADOR (DEFINIDO AFUERA)
+// 2. COMPONENTE DE RENTERO 
 // ======================================================================
 const LandlordDashboard = () => {
   return (
     <div className="relative z-10 max-w-7xl mx-auto space-y-10">
 
-      {/* Encabezado Arrendador */}
+      {/* Encabezado  */}
       <div className="flex flex-col md:flex-row justify-between items-end gap-4">
         <div className="text-white space-y-2">
           <h1 className="text-4xl font-bold">Panel de Anfitrión</h1>
@@ -233,7 +232,7 @@ const LandlordDashboard = () => {
 };
 
 // ======================================================================
-// 3. COMPONENTE PRINCIPAL (DASHBOARD PAGE)
+// 3. COMPONENTE PRINCIPAL 
 // ======================================================================
 const DashboardPage = () => {
   const { authUser } = useAuthStore();
@@ -246,7 +245,6 @@ const DashboardPage = () => {
       <div className="absolute bottom-0 right-[-10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none"></div>
 
       {/* RENDERIZADO CONDICIONAL POR ROL */}
-      {/* Pasamos authUser como prop al StudentDashboard */}
       {authUser?.role === 'landlord' ? <LandlordDashboard /> : <StudentDashboard authUser={authUser} />}
     </div>
   );

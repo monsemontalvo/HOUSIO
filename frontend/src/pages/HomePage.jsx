@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Mail, Lock, Home, ArrowRight, Loader, Key } from 'lucide-react'; // Agregamos Key icon
+import { User, Mail, Lock, Home, ArrowRight, Loader, Key } from 'lucide-react'; 
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -21,7 +21,7 @@ const HomePage = () => {
       const success = await login({ email: formData.email, password: formData.password });
       if (success) navigate("/dashboard");
     } else {
-      const success = await signup(formData); // Enviamos todo el formData (incluido el role)
+      const success = await signup(formData); // En el signup ya se envía el rol junto con el resto de los datos
       if (success) navigate("/dashboard");
     }
   };

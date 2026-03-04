@@ -10,7 +10,7 @@ const ChatPage = () => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    // Agregar mensaje simulado
+    // Simula el envío de un mensaje 
     setMessages([...messages, { id: Date.now(), text: inputValue, sender: 'me', time: 'Justo ahora' }]);
     setInputValue("");
   };
@@ -65,7 +65,7 @@ const ChatPage = () => {
         {/* --- ÁREA DE CHAT --- */}
         <div className="flex-1 flex flex-col bg-black/40 relative">
           
-          {/* Header del Chat (LIMPIO) */}
+          {/* Header del Chat */}
           <div className="h-16 border-b border-white/10 flex items-center justify-between px-6 bg-white/5 backdrop-blur-md">
             <div className="flex items-center gap-3">
               <div className="avatar"> 
@@ -75,7 +75,6 @@ const ChatPage = () => {
               </div>
               <div>
                 <h3 className="text-white font-bold">Roberto Gómez</h3>
-                {/* Eliminado el texto de "En línea" */}
               </div>
             </div>
 
@@ -84,7 +83,7 @@ const ChatPage = () => {
           {/* Cuerpo de Mensajes */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.length === 0 ? (
-              // ESTADO VACÍO (Placeholder por defecto)
+              // ESTADO VACÍO - Sin mensajes
               <div className="h-full flex flex-col items-center justify-center text-center opacity-50">
                 <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-4">
                   <Send className="size-10 text-gray-400" />

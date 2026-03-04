@@ -21,7 +21,7 @@ const HelpPage = () => {
           </p>
         </div>
 
-        {/* Sección de Preguntas Frecuentes (TUS PREGUNTAS) */}
+        {/* Sección de Preguntas*/}
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold text-white mb-6">Preguntas Frecuentes</h2>
           
@@ -67,7 +67,7 @@ const HelpPage = () => {
           ))}
         </div>
 
-        {/* Sección de Contacto (Igual que antes) */}
+        {/* Sección de Contacto */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl pointer-events-none"></div>
           

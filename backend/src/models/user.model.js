@@ -20,11 +20,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    // --- NUEVO CAMPO: ROL ---
     role: {
       type: String,
-      enum: ["student", "landlord"], // Solo permite estos dos valores
-      default: "student", // Por defecto es estudiante
+      enum: ["student", "landlord"], 
+      default: "student", 
     },
   },
   { timestamps: true }

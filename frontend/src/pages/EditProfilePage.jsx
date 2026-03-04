@@ -27,7 +27,7 @@ const EditProfilePage = () => {
   return (
     <div className="min-h-screen w-full bg-neutral-950 relative pt-24 px-4 pb-12 overflow-hidden flex items-center justify-center">
       
-      {/* Luces Ambientales (Estilo Housio) */}
+      {/* Luces Ambientales*/}
       <div className="absolute top-0 left-[-10%] w-[500px] h-[500px] bg-orange-600/20 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-0 right-[-10%] w-[500px] h-[500px] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none"></div>
 
@@ -117,7 +117,7 @@ const EditProfilePage = () => {
 
         </div>
 
-        {/* --- BOTÓN DE GUARDAR (Solo aparece si seleccionaste una imagen) --- */}
+        {/* --- BOTÓN DE GUARDAR (solo aparece si se selecciona una imagen) --- */}
         {selectedImg && (
           <div className="mt-8 animate-fade-in-up">
             <button

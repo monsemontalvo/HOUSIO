@@ -10,10 +10,10 @@ const ScheduleVisitPage = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
 
-  // DATOS MOCK: Días disponibles en el mes (ej. 5, 8, 12...)
+  // datos random 
   const availableDays = [5, 8, 12, 14, 15, 19, 22, 23, 26, 29];
   
-  // Generar días del mes (simulado 30 días)
+  // Generar días del mes 
   const days = Array.from({ length: 30 }, (_, i) => i + 1);
 
   const handleSchedule = () => {

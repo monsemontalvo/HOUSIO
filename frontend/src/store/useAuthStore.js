@@ -1,3 +1,5 @@
+//Memoria central del front que recuerda qué usuario inició sesión y se comunica con el backend para gestionar todos sus accesos 
+
 import { create } from "zustand";
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -5,13 +7,13 @@ import { toast } from "react-hot-toast";
 export const useAuthStore = create((set) => ({
   authUser: null,
   
-  // Estados de carga (Loading States)
+  // Estados de carga 
   isSigningUp: false,
   isLoggingIn: false,
   isUpdatingProfile: false,
-  isCheckingAuth: true, // <--- IMPORTANTE: Empieza en true para verificar al cargar
+  isCheckingAuth: true, 
 
-  // 1. VERIFICAR AUTENTICACIÓN (Esta es la que faltaba)
+  // 1. VERIFICAR AUTENTICACIÓN 
   checkAuth: async () => {
     try {
       const res = await axios.get("/api/auth/check");

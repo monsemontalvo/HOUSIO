@@ -1,10 +1,12 @@
+//LOGICA DE AUTENTICACION 
+
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
-  // 1. Recibimos los datos del formulario, INCLUYENDO EL ROL
+  // Recibe los datos del formulario, INCLUYENDO EL ROL
   const { fullName, email, password, role } = req.body;
 
   try {
@@ -25,7 +27,7 @@ export const signup = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 2. Crear el usuario con el ROL seleccionado (o 'student' por defecto)
+    //Crear el usuario con el ROL seleccionado (o 'student' por defecto)
     const newUser = new User({
       fullName,
       email,
@@ -38,7 +40,7 @@ export const signup = async (req, res) => {
       generateToken(newUser._id, res);
       await newUser.save();
 
-      // 3. Responder con los datos del usuario (incluyendo role)
+      // Responder con los datos del usuario (incluyendo rol)
       res.status(201).json({
         _id: newUser._id,
         fullName: newUser.fullName,
@@ -64,7 +66,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Credenciales inválidas" });
     }
 
-    // Verificar contraseña
+    // bcrypt.compare para ver si la contraseña escrita coincide con la encriptada.
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
     if (!isPasswordCorrect) {
       return res.status(400).json({ message: "Credenciales inválidas" });
@@ -79,7 +81,7 @@ export const login = async (req, res) => {
       fullName: user.fullName,
       email: user.email,
       profilePic: user.profilePic,
-      role: user.role, // Importante devolver el rol aquí también
+      role: user.role, 
     });
   } catch (error) {
     console.log("Error en login controller", error.message);
@@ -87,6 +89,8 @@ export const login = async (req, res) => {
   }
 }; 3
 
+
+//sobrescribe la cookie jwt por un valor vacío y le pone un tiempo de vida de 0
 export const logout = (req, res) => {
   try {
     res.cookie("jwt", "", { maxAge: 0 }); // Borrar cookie
@@ -116,6 +120,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+//revisar autenticación del usuario, si el token es válido, devuelve los datos del usuario
 export const checkAuth =  (req, res) => {
   try {
     res.status(200).json(req.user);

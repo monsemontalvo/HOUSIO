@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, Clock, MapPin, CheckCircle, XCircle, AlertCircle, ArrowRight } from 'lucide-react';
 
 const MyVisitsPage = () => {
-  // Datos MOCK
+  // datos random
   const visits = [
     {
       id: 1,

@@ -5,7 +5,7 @@ import { MapPin, Wifi, Car, PawPrint, Zap, Star, User, Shield, ArrowLeft } from 
 const DetailsPage = () => {
     const { id } = useParams();
 
-    // INFO PROVISIONAL (Mock Data)
+    // INFO PROVISIONAL 
     const property = {
         id: id,
         title: 'Loft Moderno en San Nicolás',
@@ -67,7 +67,7 @@ const DetailsPage = () => {
                     </div>
                 </div>
 
-                {/* Galería de Imágenes (Grid Bento) */}
+                {/* Galería de Imágenes */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 h-[400px] md:h-[500px]">
                     <div className="md:col-span-2 md:row-span-2 rounded-3xl overflow-hidden shadow-2xl border border-white/10 group relative">
                         <img src={property.images[0]} alt="Main" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -114,13 +114,12 @@ const DetailsPage = () => {
 
                         {/* MAPA (Placeholder) */}
                         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-2 overflow-hidden h-[300px] relative group">
-                            {/* Imagen de fondo simulando mapa (puedes cambiarla por una captura de Google Maps real de la zona) */}
+                            {/* Imagen de fondo simulando mapa */}
                             <div className="absolute inset-0 bg-[url('https://api.mapbox.com/styles/v1/mapbox/dark-v10/static/-100.31,25.72,13,0/800x400?access_token=YOUR_TOKEN')] bg-cover bg-center opacity-50 grayscale group-hover:grayscale-0 transition-all duration-500"></div>
                             <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black/40 backdrop-blur-[2px]">
                                 <MapPin className="size-10 text-orange-500 mb-2 animate-bounce" />
                                 <h3 className="text-xl font-bold text-white">Ubicación Exacta</h3>
                                 <p className="text-gray-400 text-sm">Se mostrará al confirmar la visita</p>
-                                {/* Nota para ti */}
                                 <span className="badge badge-warning gap-2 mt-4 opacity-80">Aquí irá Google Maps API</span>
                             </div>
                         </div>
