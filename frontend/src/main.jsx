@@ -1,3 +1,5 @@
+//primer archivo de React que se ejecuta
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
@@ -12,3 +14,5 @@ createRoot(document.getElementById('root')).render(
     </BrowserRouter>
   </StrictMode>,
 )
+
+//<App /> dentro de <BrowserRouter> -> permite que sea una "Single Page Application" (SPA).
