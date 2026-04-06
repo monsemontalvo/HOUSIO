@@ -6,9 +6,13 @@ import authRoutes from './routes/auth.route.js'; //importar rutas de autenticaci
 import dotenv from 'dotenv'; //dotenv: librería que permite cargar variables de entorno desde un archivo .env
 import { connectDB } from './lib/db.js'; //conectar bd 
 import cookieParser from 'cookie-parser'; //cookie-parser: middleware que permite manejar cookies en las solicitudes HTTP.
-
+import inmuebleRoutes from "./routes/inmueble.route.js";
+import visitaRoutes from "./routes/visita.route.js";
+import mensajeRoutes from "./routes/mensaje.route.js";
+import resenaRoutes from "./routes/reseña.route.js";
+import { app, server } from "./lib/socket.js";
 dotenv.config(); //dotenv.config() carga las variables de entorno definidas en el archivo .env para que estén disponibles en process.env
-const app = express(); //app es la instancia del servidor Express que se va a configurar y ejecutar.
+//const app = express(); //app es la instancia del servidor Express que se va a configurar y ejecutar.
 
 //PORT se obtiene de las variables de entorno para que el servidor pueda usar el puerto asignado por el entorno de producción 
 const PORT = process.env.PORT;
@@ -21,10 +25,17 @@ app.use(express.urlencoded({ limit: "10mb", extended: true })); //lo mismo pero 
 //cookieParser se usa para manejar cookies, que son esenciales para la autenticación basada en tokens (como JWT) que se almacenan en cookies.
 app.use(cookieParser());
 app.use("/api/auth", authRoutes); //las peticiones que empiecen con /api/auth sean manejadas por el archivo authRoutes
-
-
+app.use("/api/inmuebles", inmuebleRoutes);
+app.use("/api/visitas", visitaRoutes);
+app.use("/api/mensajes", mensajeRoutes);
+app.use("/api/resena", resenaRoutes);
 //app.listen enciende el servidor-> llama a la función connectDB -> busca la bd de MongoDB Atlas y se conecta
-app.listen(PORT, () => {
+/*app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+  connectDB();
+}); */
+
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   connectDB();
 });

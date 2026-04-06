@@ -1,0 +1,44 @@
+import Resena from "../models/Reseña.model.js";
+import Inmueble from "../models/Inmueble.model.js";
+
+// --- CREAR UNA RESEÑA ---
+export const crearResena = async (req, res) => {
+  try {
+    const { inmuebleId, texto, calificacion } = req.body;
+    const autorId = req.user._id;
+
+    // Validaciones básicas
+    if (!inmuebleId || !texto || !calificacion) {
+      return res.status(400).json({ message: "Todos los campos son obligatorios" });
+    }
+
+    const nuevaResena = new Resena({
+      autor: autorId,
+      inmueble: inmuebleId,
+      texto,
+      calificacion
+    });
+
+    await nuevaResena.save();
+    res.status(201).json(nuevaResena);
+  } catch (error) {
+    console.log("Error en crearResena:", error.message);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
+
+// --- OBTENER RESEÑAS DE UN INMUEBLE ---
+export const obtenerResenasPorInmueble = async (req, res) => {
+  try {
+    const { id: inmuebleId } = req.params;
+
+    const resenas = await Resena.find({ inmueble: inmuebleId })
+      .populate("autor", "fullName profilePic") // Para mostrar la foto y nombre del que comenta
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(resenas);
+  } catch (error) {
+    console.log("Error en obtenerResenasPorInmueble:", error.message);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
