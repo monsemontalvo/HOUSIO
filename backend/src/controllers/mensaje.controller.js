@@ -34,8 +34,8 @@ export const enviarMensaje = async (req, res) => {
     const nuevoMensaje = new Mensaje({
       remitente: remitenteId,
       destinatario: destinatarioId,
-      inmueble: inmuebleId,
       contenido,
+      ...(inmuebleId && { inmueble: inmuebleId }),
     });
 
     await nuevoMensaje.save();

@@ -1,28 +1,38 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Calendar, Clock, ChevronLeft, ChevronRight, CheckCircle, ArrowLeft } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, CheckCircle, ArrowLeft, Loader } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useVisitaStore } from '../store/useVisitaStore';
 
 const ScheduleVisitPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { agendarVisita, isLoading } = useVisitaStore();
   
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
 
-  // datos random 
   const availableDays = [5, 8, 12, 14, 15, 19, 22, 23, 26, 29];
-  
-  // Generar días del mes 
   const days = Array.from({ length: 30 }, (_, i) => i + 1);
 
-  const handleSchedule = () => {
+  const handleSchedule = async () => {
     if (!selectedDate || !selectedTime) {
       toast.error("Por favor selecciona fecha y hora");
       return;
     }
-    toast.success("¡Visita agendada con éxito! El anfitrión confirmará pronto.");
-    setTimeout(() => navigate('/dashboard'), 2000);
+    
+    // Formatear datos para el backend
+    const fechaCompleta = `2026-10-${selectedDate.toString().padStart(2, '0')}`;
+    
+    const success = await agendarVisita({
+        inmuebleId: id,
+        fecha: fechaCompleta,
+        hora: selectedTime
+    });
+
+    if(success) {
+        setTimeout(() => navigate('/visits'), 2000);
+    }
   };
 
   return (
@@ -119,9 +129,10 @@ const ScheduleVisitPage = () => {
 
             <button 
               onClick={handleSchedule}
-              className="w-full btn bg-orange-600 hover:bg-orange-700 text-white border-none rounded-xl h-12 text-lg shadow-lg shadow-orange-900/20 mt-6"
+              disabled={isLoading}
+              className="w-full btn bg-orange-600 hover:bg-orange-700 text-white border-none rounded-xl h-12 text-lg shadow-lg mt-6"
             >
-              Confirmar Visita <CheckCircle className="size-5 ml-2" />
+              {isLoading ? <Loader className="animate-spin" /> : <>Confirmar Visita <CheckCircle className="size-5 ml-2" /></>}
             </button>
           </div>
 

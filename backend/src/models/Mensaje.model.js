@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const mensajeSchema = new mongoose.Schema({
   remitente: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   destinatario: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  inmueble: { type: mongoose.Schema.Types.ObjectId, ref: "Inmueble", required: true },
+  inmueble: { type: mongoose.Schema.Types.ObjectId, ref: "Inmueble" },
   contenido: { type: String, required: true },
   leido: { type: Boolean, default: false }
 }, { timestamps: true });

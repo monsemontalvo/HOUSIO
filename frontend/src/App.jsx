@@ -1,4 +1,4 @@
-//CONTROLADOR DE LA INTERFAZ
+// CONTROLADOR DE LA INTERFAZ
 
 import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
@@ -36,8 +36,10 @@ const App = () => {
     <div className="font-sans bg-neutral-950 min-h-screen text-white">
       <Navbar />
       <Routes>
+        
         <Route path='/' element={!authUser ? <HomePage /> : <Navigate to="/dashboard" />} />
         <Route path='/dashboard' element={authUser ? <DashboardPage /> : <Navigate to="/" />} />
+
         <Route path='/profile' element={authUser ? <EditProfilePage /> : <Navigate to="/" />} />
         <Route path='/help' element={<HelpPage />} />
         <Route path='/product/:id' element={authUser ? <DetailsPage /> : <Navigate to="/" />} />

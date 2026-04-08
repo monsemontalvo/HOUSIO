@@ -1,7 +1,7 @@
-//Memoria central del front que recuerda qué usuario inició sesión y se comunica con el backend para gestionar todos sus accesos 
+// Memoria central del front que recuerda qué usuario inició sesión y se comunica con el backend para gestionar todos sus accesos 
 
 import { create } from "zustand";
-import axios from "axios";
+import { axiosInstance } from "../lib/axios.js"; // <-- ¡Aquí importamos TU instancia configurada!
 import { toast } from "react-hot-toast";
 
 export const useAuthStore = create((set) => ({
@@ -16,7 +16,8 @@ export const useAuthStore = create((set) => ({
   // 1. VERIFICAR AUTENTICACIÓN 
   checkAuth: async () => {
     try {
-      const res = await axios.get("/api/auth/check");
+      // Como axiosInstance ya apunta a ".../api", solo ponemos el resto de la ruta
+      const res = await axiosInstance.get("/auth/check");
       set({ authUser: res.data });
     } catch (error) {
       console.log("Error en checkAuth", error);
@@ -30,7 +31,7 @@ export const useAuthStore = create((set) => ({
   signup: async (data) => {
     set({ isSigningUp: true });
     try {
-      const res = await axios.post("/api/auth/signup", data);
+      const res = await axiosInstance.post("/auth/signup", data);
       set({ authUser: res.data });
       toast.success("¡Cuenta creada exitosamente!");
       return true;
@@ -46,7 +47,7 @@ export const useAuthStore = create((set) => ({
   login: async (data) => {
     set({ isLoggingIn: true });
     try {
-      const res = await axios.post("/api/auth/login", data);
+      const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
       toast.success("¡Bienvenido de nuevo!");
       return true;
@@ -61,7 +62,7 @@ export const useAuthStore = create((set) => ({
   // 4. CERRAR SESIÓN
   logout: async () => {
     try {
-      await axios.post("/api/auth/logout");
+      await axiosInstance.post("/auth/logout");
       set({ authUser: null });
       toast.success("Sesión cerrada correctamente");
     } catch (error) {
@@ -73,7 +74,7 @@ export const useAuthStore = create((set) => ({
   updateProfile: async (data) => {
     set({ isUpdatingProfile: true });
     try {
-      const res = await axios.put("/api/auth/update-profile", data);
+      const res = await axiosInstance.put("/auth/update-profile", data);
       set({ authUser: res.data });
       toast.success("Foto de perfil actualizada");
     } catch (error) {

@@ -11,11 +11,19 @@ import visitaRoutes from "./routes/visita.route.js";
 import mensajeRoutes from "./routes/mensaje.route.js";
 import resenaRoutes from "./routes/reseña.route.js";
 import { app, server } from "./lib/socket.js";
+import cors from "cors"; 
 dotenv.config(); //dotenv.config() carga las variables de entorno definidas en el archivo .env para que estén disponibles en process.env
 //const app = express(); //app es la instancia del servidor Express que se va a configurar y ejecutar.
 
 //PORT se obtiene de las variables de entorno para que el servidor pueda usar el puerto asignado por el entorno de producción 
 const PORT = process.env.PORT;
+
+
+// Configuración de CORS
+app.use(cors({
+  origin: "http://localhost:5173", // La URL de tu frontend
+  credentials: true // SÚPER IMPORTANTE: Permite que pasen las cookies con el JWT
+}));
 
 //Permite que el servidor entienda información enviada en formato JSON 
 // El límite se aumentó a "10mb" específicamente para poder recibir imágenes de perfil pesadas en formato base64
