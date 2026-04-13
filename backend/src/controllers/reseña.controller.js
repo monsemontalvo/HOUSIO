@@ -7,7 +7,6 @@ export const crearResena = async (req, res) => {
     const { inmuebleId, texto, calificacion } = req.body;
     const autorId = req.user._id;
 
-    // Validaciones básicas
     if (!inmuebleId || !texto || !calificacion) {
       return res.status(400).json({ message: "Todos los campos son obligatorios" });
     }
@@ -20,7 +19,9 @@ export const crearResena = async (req, res) => {
     });
 
     await nuevaResena.save();
-    res.status(201).json(nuevaResena);
+    const resenaPoblada = await nuevaResena.populate("autor", "fullName profilePic");
+
+    res.status(201).json(resenaPoblada);
   } catch (error) {
     console.log("Error en crearResena:", error.message);
     res.status(500).json({ message: "Error interno del servidor" });

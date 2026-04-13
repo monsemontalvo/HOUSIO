@@ -6,7 +6,7 @@ const inmuebleSchema = new mongoose.Schema({
   metros2: { type: Number },
   direccion: { type: String, required: true },
   costo: { type: Number, required: true },
-  tipo: { type: String, enum: ["Casa","Departamento", "Cuarto"], required: true },
+  tipo: { type: String, enum: ["Casa","Departamento", "Habitacion"], required: true },
   descripcion: { type: String },
   imagenes: [{ type: String, default: [] }], 
   servicios: [{ type: mongoose.Schema.Types.ObjectId, ref: "Servicio" }],

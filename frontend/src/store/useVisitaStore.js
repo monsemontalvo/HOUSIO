@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios.js";
 import { toast } from "react-hot-toast";
 
-export const useVisitaStore = create((set) => ({
+export const useVisitaStore = create((set, get) => ({
   misVisitas: [],
   isLoading: false,
 

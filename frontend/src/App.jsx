@@ -1,5 +1,3 @@
-// CONTROLADOR DE LA INTERFAZ
-
 import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -14,6 +12,7 @@ import DetailsPage from './pages/DetailsPage';
 import ScheduleVisitPage from './pages/ScheduleVisitPage'; 
 import ChatPage from './pages/ChatPage';
 import MyVisitsPage from './pages/MyVisitsPage'; 
+
 
 import { useAuthStore } from './store/useAuthStore';
 
@@ -46,10 +45,10 @@ const App = () => {
         <Route path='/schedule/:id' element={authUser ? <ScheduleVisitPage /> : <Navigate to="/" />} />
         <Route path='/visits' element={authUser ? <MyVisitsPage /> : <Navigate to="/" />} />
         <Route path='/chat' element={authUser ? <ChatPage /> : <Navigate to="/" />} />
-
         <Route path='*' element={<Navigate to="/" />} />
       </Routes>
       <Toaster />
+      <Toaster containerStyle={{ zIndex: 99999 }} />
     </div>
   )
 }

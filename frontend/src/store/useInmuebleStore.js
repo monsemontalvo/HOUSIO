@@ -3,12 +3,13 @@ import { axiosInstance } from "../lib/axios.js";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore.js";
 
-export const useInmuebleStore = create((set) => ({
+export const useInmuebleStore = create((set, get) => ({
   inmuebles: [],
   currentInmueble: null, // Para guardar la casa seleccionada
   isLoading: false,
   misInmuebles: [], // Para guardar solo los del dueño
-  
+  catalogos: { servicios: [], amenidades: [], reglas: [] },
+
   getMisInmueblesAnfitrion: async () => {
   set({ isLoading: true });
   try {
@@ -46,6 +47,19 @@ export const useInmuebleStore = create((set) => ({
     }
   },
 
+  eliminarInmueble: async (id) => {
+    try {
+      await axiosInstance.delete(`/inmuebles/${id}`);
+      set((state) => ({
+        misInmuebles: state.misInmuebles.filter((inmueble) => inmueble._id !== id),
+        inmuebles: state.inmuebles.filter((inmueble) => inmueble._id !== id),
+      }));
+      toast.success("Propiedad eliminada correctamente");
+    } catch (error) {
+      toast.error("Error al eliminar la propiedad");
+    }
+  },
+
   getInmuebles: async () => {
     set({ isLoading: true });
     try {
@@ -58,6 +72,15 @@ export const useInmuebleStore = create((set) => ({
     }
   },
 
+  getCatalogos: async () => {
+    try {
+      const res = await axiosInstance.get("/inmuebles/catalogos/todos");
+      set({ catalogos: res.data });
+    } catch (error) {
+      console.log("Error catálogos", error);
+    }
+  },
+
   getInmuebleById: async (id) => {
     set({ isLoading: true });
     try {
@@ -67,6 +90,20 @@ export const useInmuebleStore = create((set) => ({
       set({ currentInmueble: found });
     } catch (error) {
       toast.error("Error al cargar detalles de la propiedad");
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  actualizarInmueble: async (id, data) => {
+    set({ isLoading: true });
+    try {
+      await axiosInstance.put(`/inmuebles/${id}`, data);
+      toast.success("¡Propiedad actualizada exitosamente!");
+      get().getMisInmueblesAnfitrion(); // Recargamos la lista
+      return true;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error al actualizar");
+      return false;
     } finally {
       set({ isLoading: false });
     }

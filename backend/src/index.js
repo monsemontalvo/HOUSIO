@@ -36,7 +36,7 @@ app.use("/api/auth", authRoutes); //las peticiones que empiecen con /api/auth se
 app.use("/api/inmuebles", inmuebleRoutes);
 app.use("/api/visitas", visitaRoutes);
 app.use("/api/mensajes", mensajeRoutes);
-app.use("/api/resena", resenaRoutes);
+app.use("/api/resenas", resenaRoutes);
 //app.listen enciende el servidor-> llama a la función connectDB -> busca la bd de MongoDB Atlas y se conecta
 /*app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
