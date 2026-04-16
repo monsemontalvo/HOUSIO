@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Star, Shield, ArrowLeft, Loader, 
   CheckCircle, Home, AlertCircle, Zap 
@@ -7,17 +7,21 @@ import {
 import { useInmuebleStore } from '../store/useInmuebleStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useResenaStore } from '../store/useResenaStore';
+import { useChatStore } from '../store/useChatStore';
 import { toast } from 'react-hot-toast';
 
 const DetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { currentInmueble, getInmuebleById, isLoading: loadingInmueble } = useInmuebleStore();
   const { authUser } = useAuthStore();
   const { resenas, getResenas, crearResena, isLoading: loadingResena } = useResenaStore();
+  
+  // Funciones del chat para el mensaje automático
+  const { setSelectedUser, enviarMensaje } = useChatStore();
 
-  // ESTADOS PARA EL MODAL DE RESEÑAS
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [rating, setRating] = useState(5); // Por defecto 5 estrellas
+  const [rating, setRating] = useState(5);
   const [comentario, setComentario] = useState("");
 
   useEffect(() => {
@@ -25,20 +29,30 @@ const DetailsPage = () => {
     getResenas(id);
   }, [id, getInmuebleById, getResenas]);
 
-  // CALCULO DEL PROMEDIO
+  const handleContactar = async () => {
+    if (!authUser) {
+      return toast.error("Inicia sesión para poder enviar mensajes");
+    }
+
+    // Configurar el chat con el dueño y enviar mensaje de apertura
+    setSelectedUser(currentInmueble.dueno);
+    await enviarMensaje(`Hola, me interesa "${currentInmueble.nombre}". ¿Aún está disponible?`);
+    
+    // Redirigir a la página de chat
+    navigate('/chat');
+  };
+
   const promedio = resenas?.length > 0 
     ? (resenas.reduce((acc, curr) => acc + curr.calificacion, 0) / resenas.length).toFixed(1) 
     : "0.0";
   const estrellasLlenas = Math.round(Number(promedio));
 
-  // FUNCIÓN PARA GUARDAR LA RESEÑA
   const handleSubmitResena = async (e) => {
     e.preventDefault();
     if (!comentario.trim()) {
       return toast.error("Por favor escribe un comentario");
     }
 
-    // Estos nombres coinciden exactamente con lo que espera tu Backend
     const success = await crearResena({
       inmuebleId: id,
       texto: comentario,
@@ -46,9 +60,9 @@ const DetailsPage = () => {
     });
 
     if (success) {
-      setIsReviewModalOpen(false); // Cerramos el modal
-      setComentario(""); // Limpiamos el texto
-      setRating(5); // Reiniciamos las estrellas
+      setIsReviewModalOpen(false);
+      setComentario("");
+      setRating(5);
     }
   };
 
@@ -70,7 +84,6 @@ const DetailsPage = () => {
           <ArrowLeft className="size-5" /> Regresar al Dashboard
         </Link>
 
-        {/* Encabezado Principal */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 capitalize">{currentInmueble.nombre}</h1>
@@ -83,7 +96,6 @@ const DetailsPage = () => {
           </div>
         </div>
 
-        {/* Galería de Imágenes */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 h-[400px] md:h-[500px]">
           <div className="md:col-span-2 md:row-span-2 rounded-3xl overflow-hidden shadow-2xl border border-white/10 group relative bg-black/50">
             <img src={currentInmueble.imagenes?.[0] || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2670'} alt="Main" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -96,9 +108,7 @@ const DetailsPage = () => {
           </div>
         </div>
 
-        {/* Contenido Dividido */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          
           <div className="lg:col-span-2 space-y-10">
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
               <h2 className="text-2xl font-bold text-white mb-4">Sobre este lugar</h2>
@@ -108,7 +118,6 @@ const DetailsPage = () => {
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8">
               <h2 className="text-2xl font-bold text-white mb-8">Lo que este lugar ofrece</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                
                 <div>
                   <h3 className="text-orange-400 font-bold mb-4 flex items-center gap-2"><Zap className="size-5" /> Servicios</h3>
                   <ul className="space-y-3">
@@ -135,7 +144,6 @@ const DetailsPage = () => {
                     )) : <li className="text-gray-500 text-sm">No especificado</li>}
                   </ul>
                 </div>
-
               </div>
             </div>
           </div>
@@ -155,9 +163,14 @@ const DetailsPage = () => {
                     <p className="text-sm text-gray-400">Anfitrión Verificado</p>
                   </div>
                 </div>
-                <Link to="/chat" className="btn w-full bg-orange-600 hover:bg-orange-700 text-white border-none rounded-xl text-lg h-12 shadow-lg shadow-orange-900/20 mb-3 flex items-center justify-center">
+                
+                <button 
+                  onClick={handleContactar}
+                  className="btn w-full bg-orange-600 hover:bg-orange-700 text-white border-none rounded-xl text-lg h-12 shadow-lg shadow-orange-900/20 mb-3 flex items-center justify-center"
+                >
                   Contactar Anfitrión
-                </Link>
+                </button>
+
                 <Link to={`/schedule/${currentInmueble._id}`} className="btn w-full btn-outline border-white/20 text-white hover:bg-white/10 hover:border-white rounded-xl text-lg h-12 flex items-center justify-center">
                   Agendar Visita
                 </Link>
@@ -166,7 +179,6 @@ const DetailsPage = () => {
           </div>
         </div>
 
-        {/* SECCIÓN DE RESEÑAS */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 mt-10">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
@@ -182,7 +194,6 @@ const DetailsPage = () => {
               </div>
             </div>
             
-            {/* ESTE BOTÓN AHORA ABRE EL MODAL */}
             {authUser?.role === 'student' && (
               <button 
                 onClick={() => setIsReviewModalOpen(true)}
@@ -199,7 +210,7 @@ const DetailsPage = () => {
                 <div className="flex items-center gap-3 mb-3">
                   <div className="avatar">
                     <div className="w-10 h-10 rounded-full bg-black/50">
-                     <img src={resena.autor?.profilePic && resena.autor.profilePic !== "" ? resena.autor.profilePic : "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} 
+                     <img src={resena.autor?.profilePic || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"} 
                       alt="User" 
                       className="w-full h-full object-cover"
                     />
@@ -223,18 +234,14 @@ const DetailsPage = () => {
             )}
           </div>
         </div>
-
       </div>
 
-      {/* MODAL PARA ESCRIBIR LA RESEÑA */}
       <div className={`modal ${isReviewModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box bg-neutral-900 border border-white/10 text-white max-w-md">
           <h3 className="font-bold text-2xl mb-2">Tu opinión importa</h3>
           <p className="text-gray-400 text-sm mb-6">Califica tu experiencia en esta propiedad.</p>
           
           <form onSubmit={handleSubmitResena} className="space-y-6">
-            
-            {/* Estrellas interactivas (1 al 5) */}
             <div className="flex justify-center gap-2">
               {[1, 2, 3, 4, 5].map((num) => (
                 <button
@@ -248,7 +255,6 @@ const DetailsPage = () => {
               ))}
             </div>
 
-            {/* Campo de texto */}
             <div>
               <textarea 
                 className="textarea w-full bg-black/30 border-white/10 h-32 resize-none focus:border-orange-500 transition-colors" 
@@ -258,7 +264,6 @@ const DetailsPage = () => {
               ></textarea>
             </div>
             
-            {/* Botones de acción */}
             <div className="modal-action">
               <button 
                 type="button" 
@@ -282,7 +287,6 @@ const DetailsPage = () => {
           </form>
         </div>
       </div>
-
     </div>
   );
 };

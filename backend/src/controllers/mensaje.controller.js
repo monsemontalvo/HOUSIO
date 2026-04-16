@@ -40,7 +40,6 @@ export const enviarMensaje = async (req, res) => {
 
     await nuevoMensaje.save();
 
-    // ⚡ AQUÍ ENTRA LA MAGIA DE SOCKET.IO ⚡
     // Buscamos si el destinatario está conectado ahorita mismo en la app
     const receiverSocketId = getReceiverSocketId(destinatarioId);
     
@@ -62,8 +61,19 @@ export const enviarMensaje = async (req, res) => {
 export const obtenerContactos = async (req, res) => {
   try {
     const myId = req.user._id;
-    // Para simplificar: buscamos a todos los usuarios registrados excepto a nosotros mismos
-    const contactos = await User.find({ _id: { $ne: myId } }).select("-password");
+
+    // 1. Obtener todos los IDs de los usuarios a los que les he enviado mensajes
+    const destinatarios = await Mensaje.distinct("destinatario", { remitente: myId });
+    
+    // 2. Obtener todos los IDs de los usuarios que me han enviado mensajes
+    const remitentes = await Mensaje.distinct("remitente", { destinatario: myId });
+
+    // 3. Unir ambos arrays y eliminar duplicados usando un Set
+    // Convertimos a string para evitar problemas de comparación con ObjectId
+    const userIdsUnicos = [...new Set([...destinatarios, ...remitentes].map(id => id.toString()))];
+
+    // 4. Buscar en la colección de Usuarios solo a aquellos cuyos IDs estén en nuestra lista
+    const contactos = await User.find({ _id: { $in: userIdsUnicos } }).select("-password");
     
     res.status(200).json(contactos);
   } catch (error) {
