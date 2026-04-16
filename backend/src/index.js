@@ -7,6 +7,7 @@ import dotenv from 'dotenv'; //dotenv: librería que permite cargar variables de
 import { connectDB } from './lib/db.js'; //conectar bd 
 import cookieParser from 'cookie-parser'; //cookie-parser: middleware que permite manejar cookies en las solicitudes HTTP.
 import inmuebleRoutes from "./routes/inmueble.route.js";
+import contactoRoutes from "./routes/contacto.route.js";
 import visitaRoutes from "./routes/visita.route.js";
 import mensajeRoutes from "./routes/mensaje.route.js";
 import resenaRoutes from "./routes/reseña.route.js";
@@ -37,6 +38,7 @@ app.use("/api/inmuebles", inmuebleRoutes);
 app.use("/api/visitas", visitaRoutes);
 app.use("/api/mensajes", mensajeRoutes);
 app.use("/api/resenas", resenaRoutes);
+app.use("/api/contacto", contactoRoutes);
 //app.listen enciende el servidor-> llama a la función connectDB -> busca la bd de MongoDB Atlas y se conecta
 /*app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

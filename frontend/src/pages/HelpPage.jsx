@@ -1,7 +1,37 @@
-import React from 'react';
-import { Mail, MessageCircle, Phone, Send } from 'lucide-react';
+import React, { useState } from 'react';
+import { Mail, MessageCircle, Phone, Send, Loader } from 'lucide-react';
+import { axiosInstance } from '../lib/axios';
+import { toast } from 'react-hot-toast';
 
 const HelpPage = () => {
+  // Estados para controlar el formulario
+  const [formData, setFormData] = useState({
+    correoUsuario: '',
+    asunto: '',
+    mensaje: ''
+  });
+  const [isSending, setIsSending] = useState(false);
+
+  // Función para enviar los datos al backend
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.correoUsuario || !formData.asunto || !formData.mensaje) {
+      return toast.error("Por favor llena todos los campos");
+    }
+
+    setIsSending(true);
+    try {
+      await axiosInstance.post('/contacto/enviar', formData);
+      toast.success("Mensaje enviado correctamente. Te contactaremos pronto.");
+      setFormData({ correoUsuario: '', asunto: '', mensaje: '' }); // Limpiar formulario
+    } catch {
+      toast.error("No se pudo enviar el mensaje. Intenta más tarde.");
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   return (
     <div className="min-h-screen w-full bg-neutral-950 relative pt-24 px-4 pb-12 overflow-hidden">
       
@@ -79,7 +109,7 @@ const HelpPage = () => {
               <div className="space-y-6">
                 <div className="flex items-center gap-4 text-gray-300">
                   <div className="bg-white/10 p-3 rounded-xl text-orange-400"><Mail className="size-6" /></div>
-                  <span>soporte@housio.com</span>
+                  <span>soporte.housio@gmail.com</span>
                 </div>
                 <div className="flex items-center gap-4 text-gray-300">
                   <div className="bg-white/10 p-3 rounded-xl text-blue-400"><Phone className="size-6" /></div>
@@ -88,15 +118,44 @@ const HelpPage = () => {
               </div>
             </div>
 
-            <form className="space-y-4">
+            {/* Formulario Conectado */}
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="form-control">
-                <input type="email" placeholder="Tu correo" className="input bg-black/30 border-white/10 text-white focus:border-orange-500/50 rounded-xl w-full" />
+                <input 
+                  type="email" 
+                  placeholder="Tu correo" 
+                  className="input bg-black/30 border-white/10 text-white focus:border-orange-500/50 rounded-xl w-full" 
+                  value={formData.correoUsuario}
+                  onChange={(e) => setFormData({...formData, correoUsuario: e.target.value})}
+                />
               </div>
               <div className="form-control">
-                <textarea className="textarea bg-black/30 border-white/10 text-white focus:border-orange-500/50 rounded-xl h-32 w-full" placeholder="Tu mensaje..."></textarea>
+                <input 
+                  type="text" 
+                  placeholder="Asunto" 
+                  className="input bg-black/30 border-white/10 text-white focus:border-orange-500/50 rounded-xl w-full" 
+                  value={formData.asunto}
+                  onChange={(e) => setFormData({...formData, asunto: e.target.value})}
+                />
               </div>
-              <button className="btn bg-orange-600 hover:bg-orange-700 text-white border-none w-full rounded-xl shadow-lg">
-                Enviar <Send className="size-5 ml-2" />
+              <div className="form-control">
+                <textarea 
+                  className="textarea bg-black/30 border-white/10 text-white focus:border-orange-500/50 rounded-xl h-32 w-full resize-none" 
+                  placeholder="Tu mensaje..."
+                  value={formData.mensaje}
+                  onChange={(e) => setFormData({...formData, mensaje: e.target.value})}
+                ></textarea>
+              </div>
+              <button 
+                type="submit" 
+                disabled={isSending}
+                className="btn bg-orange-600 hover:bg-orange-700 text-white border-none w-full rounded-xl shadow-lg"
+              >
+                {isSending ? (
+                  <Loader className="size-5 animate-spin mx-auto" />
+                ) : (
+                  <>Enviar <Send className="size-5 ml-2" /></>
+                )}
               </button>
             </form>
           </div>
