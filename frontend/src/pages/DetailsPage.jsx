@@ -173,15 +173,19 @@ const DetailsPage = () => {
           }
         }
       );
-    } catch (error) {
+    } catch  {
       toast.error("No se encontró el destino");
     }
   };
 
-  useEffect(() => {
-    if (showRoutes && destination) {
-      handleSearchRoutes();
-    }
+ useEffect(() => {
+    const initSearch = async () => {
+      if (showRoutes && destination) {
+        await handleSearchRoutes();
+      }
+    };
+
+    initSearch();
   }, [showRoutes]);
 
 
