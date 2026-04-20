@@ -23,6 +23,17 @@ const App = () => {
     checkAuth();
   }, [checkAuth]);
 
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "housio_auth_change") { 
+         window.location.reload(); 
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
   if (isCheckingAuth && !authUser) {
     return (
       <div className="flex items-center justify-center h-screen bg-neutral-950">

@@ -49,6 +49,7 @@ export const useAuthStore = create((set) => ({
     try {
       const res = await axiosInstance.post("/auth/login", data);
       set({ authUser: res.data });
+      localStorage.setItem("housio_auth_change", Date.now());
       toast.success("¡Bienvenido de nuevo!");
       return true;
     } catch (error) {
@@ -64,6 +65,7 @@ export const useAuthStore = create((set) => ({
     try {
       await axiosInstance.post("/auth/logout");
       set({ authUser: null });
+      localStorage.setItem("housio_auth_change", Date.now());
       toast.success("Sesión cerrada correctamente");
     } catch (error) {
       toast.error(error.response?.data?.message || "Error al cerrar sesión");

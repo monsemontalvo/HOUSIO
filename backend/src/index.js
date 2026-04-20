@@ -28,8 +28,9 @@ app.use(cors({
 
 //Permite que el servidor entienda información enviada en formato JSON 
 // El límite se aumentó a "10mb" específicamente para poder recibir imágenes de perfil pesadas en formato base64
-app.use(express.json({ limit: "10mb" })); 
-app.use(express.urlencoded({ limit: "10mb", extended: true })); //lo mismo pero para datos enviados en url
+// Aumente el límite a 80mb para que soporte todas las fotos y los detalles nuevos
+app.use(express.json({ limit: "80mb" })); 
+app.use(express.urlencoded({ limit: "80mb", extended: true })); //lo mismo pero para datos enviados en url
 
 //cookieParser se usa para manejar cookies, que son esenciales para la autenticación basada en tokens (como JWT) que se almacenan en cookies.
 app.use(cookieParser());

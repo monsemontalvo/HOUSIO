@@ -1,15 +1,16 @@
 import Inmueble from "../models/Inmueble.model.js";
 import cloudinary from "../lib/cloudinary.js";
-import Servicio from "../models/Servicio.model.js"; 
-import Amenidad from "../models/Amenidad.model.js"; 
-import Regla from "../models/Regla.model.js";       
+import Servicio from "../models/Servicio.model.js";
+import Amenidad from "../models/Amenidad.model.js";
+import Regla from "../models/Regla.model.js";
 
 // --- 1. CREAR UN NUEVO INMUEBLE ---
 export const crearInmueble = async (req, res) => {
   try {
-    const { 
-      nombre, metros2, direccion, costo, tipo, descripcion, 
-      imagenes, servicios, amenidades, reglas 
+    const {
+      nombre, metros2, direccion, costo, tipo, descripcion,
+      imagenes, servicios, amenidades, reglas, imagenPrincipal, detallesTecnicos,
+      latitud, longitud, zona, universidadCercana
     } = req.body;
 
     const duenoId = req.user._id;
@@ -18,10 +19,13 @@ export const crearInmueble = async (req, res) => {
       return res.status(400).json({ message: "Faltan campos obligatorios básicos" });
     }
 
+    const uploadMain = await cloudinary.uploader.upload(imagenPrincipal, { folder: "housio_inmuebles" });
+    const urlImagenPrincipal = uploadMain.secure_url;
+
     let imagenesUrls = [];
 
     if (imagenes && imagenes.length > 0) {
-      const uploadPromises = imagenes.map((imgBase64) => 
+      const uploadPromises = imagenes.map((imgBase64) =>
         cloudinary.uploader.upload(imgBase64, { folder: "housio_inmuebles" })
       );
       const uploadResults = await Promise.all(uploadPromises);
@@ -32,10 +36,16 @@ export const crearInmueble = async (req, res) => {
       nombre,
       dueno: duenoId,
       metros2,
-      direccion, 
+      direccion,
+      latitud,
+      longitud,
+      zona,
+      universidadCercana,
       costo,
       tipo,
+      detallesTecnicos,
       descripcion,
+      imagenPrincipal: urlImagenPrincipal,
       imagenes: imagenesUrls,
       servicios,
       amenidades,
@@ -62,11 +72,11 @@ export const crearInmueble = async (req, res) => {
 export const obtenerInmuebles = async (req, res) => {
   try {
     const inmuebles = await Inmueble.find()
-      .populate("dueno", "fullName profilePic email")
+      .populate("dueno", "fullName profilePic email createdAt")
       .populate("servicios")
       .populate("amenidades")
       .populate("reglas");
-      
+
     res.status(200).json(inmuebles);
   } catch (error) {
     console.log("Error en obtenerInmuebles:", error.message);
@@ -80,7 +90,7 @@ export const obtenerInmueblePorId = async (req, res) => {
     const { id } = req.params;
 
     const inmueble = await Inmueble.findById(id)
-      .populate("dueno", "fullName profilePic email")
+      .populate("dueno", "fullName profilePic email createdAt")
       .populate("servicios")
       .populate("amenidades")
       .populate("reglas");
@@ -100,16 +110,34 @@ export const obtenerInmueblePorId = async (req, res) => {
 export const actualizarInmueble = async (req, res) => {
   try {
     const { id } = req.params;
+    let updateData = { ...req.body };
     const inmueble = await Inmueble.findById(id);
-    
+
     if (!inmueble) return res.status(404).json({ message: "Inmueble no encontrado" });
-    
+
     if (inmueble.dueno.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "No autorizado" });
     }
 
-    // CORRECCIÓN: Agregamos .populate() al final de la actualización
-    const inmuebleActualizado = await Inmueble.findByIdAndUpdate(id, req.body, { returnDocument: 'after' })
+    // 1. Procesar Imagen Principal si es nueva (Base64)
+    if (updateData.imagenPrincipal && updateData.imagenPrincipal.startsWith("data:image")) {
+      const uploadRes = await cloudinary.uploader.upload(updateData.imagenPrincipal, { folder: "housio_inmuebles" });
+      updateData.imagenPrincipal = uploadRes.secure_url;
+    }
+
+    // 2. Procesar Galería de imágenes (NUEVO: Verifica si hay Base64 nuevos en el array)
+    if (updateData.imagenes && updateData.imagenes.length > 0) {
+      const uploadPromises = updateData.imagenes.map(async (img) => {
+        if (img.startsWith("data:image")) {
+          const res = await cloudinary.uploader.upload(img, { folder: "housio_inmuebles" });
+          return res.secure_url;
+        }
+        return img;
+      });
+      updateData.imagenes = await Promise.all(uploadPromises);
+    }
+
+    const inmuebleActualizado = await Inmueble.findByIdAndUpdate(id, updateData, { new: true })
       .populate("servicios")
       .populate("amenidades")
       .populate("reglas");
@@ -117,7 +145,7 @@ export const actualizarInmueble = async (req, res) => {
     res.status(200).json(inmuebleActualizado);
   } catch (error) {
     console.log("Error en actualizarInmueble:", error.message);
-    res.status(500).json({ message: "Error interno" });
+    res.status(500).json({ message: "Error interno al actualizar la propiedad" });
   }
 };
 
@@ -126,9 +154,9 @@ export const eliminarInmueble = async (req, res) => {
   try {
     const { id } = req.params;
     const inmueble = await Inmueble.findById(id);
-    
+
     if (!inmueble) return res.status(404).json({ message: "Inmueble no encontrado" });
-    
+
     if (inmueble.dueno.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "No tienes permiso para eliminar esto" });
     }
@@ -147,7 +175,7 @@ export const obtenerCatalogos = async (req, res) => {
     const servicios = await Servicio.find();
     const amenidades = await Amenidad.find();
     const reglas = await Regla.find();
-    
+
     res.status(200).json({ servicios, amenidades, reglas });
   } catch (error) {
     console.log("Error en obtenerCatalogos:", error.message);
