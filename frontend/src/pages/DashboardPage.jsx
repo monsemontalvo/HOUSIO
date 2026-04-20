@@ -85,23 +85,25 @@ const StudentDashboard = ({ authUser }) => {
   const [busqueda, setBusqueda] = useState("");
   const [tipoFiltro, setTipoFiltro] = useState("Todos");
   const [precioFiltro, setPrecioFiltro] = useState("Todos");
+  
+  // NUEVOS ESTADOS PARA PRECIO PERSONALIZADO
+  const [precioMin, setPrecioMin] = useState("");
+  const [precioMax, setPrecioMax] = useState("");
+  
   const [filtrosActivos, setFiltrosActivos] = useState([]);
 
   const [paginaActual, setPaginaActual] = useState(1);
-  const inmueblesPorPagina = 12;//Cantifad maxima de inmuebles por pagina
+  const inmueblesPorPagina = 12;//Cantidad maxima de inmuebles por pagina
 
   useEffect(() => {
     getInmuebles();
   }, [getInmuebles]);
 
-  useEffect(() => {
-    setPaginaActual(1);
-  }, [busqueda, tipoFiltro, precioFiltro, filtrosActivos]);
-
   const toggleFiltro = (id) => {
     setFiltrosActivos(prev =>
       prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
     );
+    setPaginaActual(1); // Reiniciar paginación al cambiar filtros
   };
 
   // EL MOTOR DE BÚSQUEDA
@@ -115,12 +117,21 @@ const StudentDashboard = ({ authUser }) => {
 
     const coincideTipo = tipoFiltro === "Todos" || prop.tipo === tipoFiltro;
 
-
-
+    // LOGICA ACTUALIZADA DE PRECIOS
     let coincidePrecio = true;
-    if (precioFiltro === "1000-3000") coincidePrecio = prop.costo >= 1000 && prop.costo <= 3000;
-    if (precioFiltro === "3000-6000") coincidePrecio = prop.costo > 3000 && prop.costo <= 6000;
-    if (precioFiltro === "6000+") coincidePrecio = prop.costo > 6000;
+    const costoNum = Number(prop.costo);
+
+    if (precioFiltro === "1000-3000") {
+      coincidePrecio = costoNum >= 1000 && costoNum <= 3000;
+    } else if (precioFiltro === "3000-6000") {
+      coincidePrecio = costoNum > 3000 && costoNum <= 6000;
+    } else if (precioFiltro === "6000+") {
+      coincidePrecio = costoNum > 6000;
+    } else if (precioFiltro === "Personalizado") {
+      const min = precioMin === "" ? 0 : Number(precioMin);
+      const max = precioMax === "" ? Infinity : Number(precioMax);
+      coincidePrecio = costoNum >= min && costoNum <= max;
+    }
 
     let coincideRapido = true;
     if (filtrosActivos.length > 0) {
@@ -168,8 +179,6 @@ const StudentDashboard = ({ authUser }) => {
   const inmueblesPaginados = inmueblesFiltrados.slice(indicePrimerInmueble, indiceUltimoInmueble);
   const totalPaginas = Math.ceil(inmueblesFiltrados.length / inmueblesPorPagina);
 
-
-
   return (
     <div className="relative z-10 max-w-7xl mx-auto space-y-10">
       {/* Encabezado */}
@@ -192,7 +201,10 @@ const StudentDashboard = ({ authUser }) => {
                 type="text"
                 placeholder="¿Cerca de qué facultad buscas o cómo se llama la zona?"
                 value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
+                onChange={(e) => {
+                  setBusqueda(e.target.value);
+                  setPaginaActual(1);
+                }}
                 className="w-full bg-black/20 border border-white/5 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 outline-none focus:bg-black/40 focus:border-orange-500/50 transition-all"
               />
             </div>
@@ -204,23 +216,73 @@ const StudentDashboard = ({ authUser }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center mb-4">
             <div className="relative">
               <Home className="absolute left-3 top-2.5 text-gray-400 size-4 pointer-events-none" />
-              <select value={tipoFiltro} onChange={(e) => setTipoFiltro(e.target.value)} className="select w-full pl-10 bg-black/20 border-white/5 text-gray-300 focus:bg-black/40 focus:border-orange-500/50 rounded-xl h-10 min-h-0">
-                <option value="Todos">Cualquier tipo</option>
-                <option value="Casa">Casa</option>
-                <option value="Departamento">Departamento</option>
-                <option value="Habitacion">Habitación</option>
+              <select
+                value={tipoFiltro}
+                onChange={(e) => {
+                  setTipoFiltro(e.target.value);
+                  setPaginaActual(1);
+                }}
+                className="select w-full pl-10 bg-black/20 border-white/5 text-gray-300 focus:bg-black/40 focus:border-orange-500/50 rounded-xl h-10 min-h-0"
+              >
+                <option className="bg-neutral-900 text-white" value="Todos">Cualquier tipo</option>
+                <option className="bg-neutral-900 text-white" value="Casa">Casa</option>
+                <option className="bg-neutral-900 text-white" value="Departamento">Departamento</option>
+                <option className="bg-neutral-900 text-white" value="Habitacion">Habitación</option>
               </select>
             </div>
             <div className="relative">
               <DollarSign className="absolute left-3 top-2.5 text-gray-400 size-4 pointer-events-none" />
-              <select value={precioFiltro} onChange={(e) => setPrecioFiltro(e.target.value)} className="select w-full pl-10 bg-black/20 border-white/5 text-gray-300 focus:bg-black/40 focus:border-orange-500/50 rounded-xl h-10 min-h-0">
-                <option value="Todos">Cualquier precio</option>
-                <option value="1000-3000">$1,000 - $3,000</option>
-                <option value="3000-6000">$3,000 - $6,000</option>
-                <option value="6000+">$6,000 o más</option>
+              <select
+                value={precioFiltro}
+                onChange={(e) => {
+                  setPrecioFiltro(e.target.value);
+                  setPaginaActual(1);
+                  if(e.target.value !== "Personalizado") {
+                    setPrecioMin("");
+                    setPrecioMax("");
+                  }
+                }}
+                className="select w-full pl-10 bg-black/20 border-white/5 text-gray-300 focus:bg-black/40 focus:border-orange-500/50 rounded-xl h-10 min-h-0"
+              >
+                <option className="bg-neutral-900 text-white" value="Todos">Cualquier precio</option>
+                <option className="bg-neutral-900 text-white" value="1000-3000">$1,000 - $3,000</option>
+                <option className="bg-neutral-900 text-white" value="3000-6000">$3,000 - $6,000</option>
+                <option className="bg-neutral-900 text-white" value="6000+">$6,000 o más</option>
+                <option className="bg-neutral-900 text-white" value="Personalizado">Personalizado...</option>
               </select>
             </div>
-            <div className="hidden md:block"></div>
+            
+            {/* INPUTS MIN/MAX DE PRECIO PERSONALIZADO */}
+            <div className="w-full">
+              {precioFiltro === "Personalizado" ? (
+                <div className="flex gap-2 items-center">
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-2.5 text-gray-400 font-bold size-4 pointer-events-none text-sm">Min</span>
+                    <input
+                      type="number"
+                      placeholder="$0"
+                      value={precioMin}
+                      onChange={(e) => { setPrecioMin(e.target.value); setPaginaActual(1); }}
+                      className="input w-full pl-10 bg-black/20 border border-white/5 text-white placeholder-gray-500 outline-none focus:bg-black/40 focus:border-orange-500/50 rounded-xl h-10 min-h-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </div>
+                  <span className="text-gray-500 font-bold">-</span>
+                  <div className="relative flex-1">
+                    <span className="absolute left-3 top-2.5 text-gray-400 font-bold size-4 pointer-events-none text-sm">Max</span>
+                    <input
+                      type="number"
+                      placeholder="$∞"
+                      value={precioMax}
+                      onChange={(e) => { setPrecioMax(e.target.value); setPaginaActual(1); }}
+                      className="input w-full pl-11 bg-black/20 border border-white/5 text-white placeholder-gray-500 outline-none focus:bg-black/40 focus:border-orange-500/50 rounded-xl h-10 min-h-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="hidden md:block"></div>
+              )}
+            </div>
+
             {/* Barra de Filtros */}
             <div className="flex justify-start mt-4">
               <button
@@ -244,7 +306,10 @@ const StudentDashboard = ({ authUser }) => {
 
               {filtrosActivos.length > 0 && (
                 <button
-                  onClick={() => setFiltrosActivos([])}
+                  onClick={() => {
+                    setFiltrosActivos([]);
+                    setPaginaActual(1);
+                  }}
                   className="ml-4 text-xs text-gray-500 hover:text-orange-500 underline"
                 >
                   Limpiar todo
@@ -266,7 +331,18 @@ const StudentDashboard = ({ authUser }) => {
           <Search className="size-16 mx-auto mb-4 text-orange-600/50" />
           <h3 className="text-2xl font-bold text-white mb-2">Sin resultados</h3>
           <p className="text-gray-400">No encontramos propiedades que coincidan con tus filtros.</p>
-          <button onClick={() => { setBusqueda(""); setTipoFiltro("Todos"); setPrecioFiltro("Todos"); setFiltroRapido(""); }} className="btn btn-outline text-orange-500 border-orange-500 hover:bg-orange-500 hover:border-orange-500 hover:text-white mt-6">
+          <button
+            onClick={() => {
+              setBusqueda("");
+              setTipoFiltro("Todos");
+              setPrecioFiltro("Todos");
+              setPrecioMin("");
+              setPrecioMax("");
+              setFiltrosActivos([]);
+              setPaginaActual(1);
+            }}
+            className="btn btn-outline text-orange-500 border-orange-500 hover:bg-orange-500 hover:border-orange-500 hover:text-white mt-6"
+          >
             Limpiar Filtros
           </button>
         </div>
@@ -410,7 +486,15 @@ const StudentDashboard = ({ authUser }) => {
           </div>
 
           <div className="modal-action border-t border-white/10 pt-4 mt-6">
-            <button onClick={() => setFiltrosActivos([])} className="btn btn-ghost text-gray-400">Borrar todo</button>
+            <button
+              onClick={() => {
+                setFiltrosActivos([]);
+                setPaginaActual(1);
+              }}
+              className="btn btn-ghost text-gray-400"
+            >
+              Borrar todo
+            </button>
             <button onClick={() => setIsFilterModalOpen(false)} className="btn bg-orange-600 hover:bg-orange-700 text-white border-none px-8">
               Mostrar resultados
             </button>
