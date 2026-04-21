@@ -1,5 +1,6 @@
 import Resena from "../models/Reseña.model.js";
 import Inmueble from "../models/Inmueble.model.js";
+import { enviarNotificacion } from "../lib/notificacion.utils.js";
 
 // --- CREAR UNA RESEÑA ---
 export const crearResena = async (req, res) => {
@@ -20,6 +21,18 @@ export const crearResena = async (req, res) => {
 
     await nuevaResena.save();
     const resenaPoblada = await nuevaResena.populate("autor", "fullName profilePic");
+
+    // --- NOTIFICACIÓN AL DUEÑO ---
+    const inmuebleInfo = await Inmueble.findById(inmuebleId).select("dueno nombre");
+    if (inmuebleInfo && inmuebleInfo.dueno.toString() !== autorId.toString()) {
+      await enviarNotificacion({
+        receptor: inmuebleInfo.dueno,
+        emisor: autorId,
+        tipo: "resena",
+        referenciaId: nuevaResena._id,
+        texto: `Han dejado una reseña de ${calificacion} estrellas en "${inmuebleInfo.nombre}"`
+      });
+    }
 
     res.status(201).json(resenaPoblada);
   } catch (error) {

@@ -555,10 +555,11 @@ const LandlordDashboard = () => {
   const [editId, setEditId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const estadoInicialForm = {
+const estadoInicialForm = {
     nombre: "", direccion: "", costo: "", tipo: "Departamento", descripcion: "",
     servicios: [], amenidades: [], reglas: [], imagenPrincipal: "", detallesTecnicos: [],
-    latitud: "", longitud: "", zona: "", universidadCercana: ""
+    latitud: "", longitud: "", zona: "", universidadCercana: "",
+    horariosVisita: []
   };
 
   const [formData, setFormData] = useState(estadoInicialForm);
@@ -659,7 +660,8 @@ const LandlordDashboard = () => {
       servicios: inmueble.servicios.map(s => s._id || s),
       amenidades: inmueble.amenidades.map(a => a._id || a),
       reglas: inmueble.reglas.map(r => r._id || r),
-      detallesTecnicos: inmueble.detallesTecnicos || []
+      detallesTecnicos: inmueble.detallesTecnicos || [],
+      horariosVisita: inmueble.horariosVisita || []
     });
     setImagenesPreview(inmueble.imagenes || []);
     setIsModalOpen(true);
@@ -970,6 +972,47 @@ const LandlordDashboard = () => {
             </div>
 
             <textarea placeholder="Descripción detallada" className="textarea w-full bg-black/30 border-white/10 h-24" value={formData.descripcion} onChange={e => setFormData({ ...formData, descripcion: e.target.value })} required></textarea>
+            {/* HORARIOS DE VISITA */}
+            <div className="space-y-4 pt-4 border-t border-white/10">
+              <div>
+                <h4 className="font-bold text-sm text-green-400 mb-1 flex items-center gap-2">
+                  <Clock className="size-4" /> Horarios de Visita Disponibles
+                </h4>
+                <p className="text-xs text-gray-500 mb-3">
+                  Selecciona a qué horas los estudiantes pueden agendar para ver tu propiedad.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+                    "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM",
+                    "05:00 PM", "06:00 PM", "07:00 PM"
+                  ].map((hora) => {
+                    const isSelected = formData.horariosVisita.includes(hora);
+                    return (
+                      <button
+                        type="button"
+                        key={hora}
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            horariosVisita: isSelected 
+                              ? prev.horariosVisita.filter(h => h !== hora)
+                              : [...prev.horariosVisita, hora].sort()
+                          }));
+                        }}
+                        className={`badge badge-lg border-none cursor-pointer transition-all hover:scale-105 ${
+                          isSelected 
+                            ? "bg-green-500 text-black font-bold shadow-lg shadow-green-900/20" 
+                            : "bg-white/10 text-gray-400 hover:bg-white/20"
+                        }`}
+                      >
+                        {hora}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-white/10">
               <div>

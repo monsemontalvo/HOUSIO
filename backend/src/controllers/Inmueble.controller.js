@@ -8,10 +8,11 @@ import Regla from "../models/Regla.model.js";
 export const crearInmueble = async (req, res) => {
   try {
     const {
-      nombre, metros2, direccion, costo, tipo, descripcion,
-      imagenes, servicios, amenidades, reglas, imagenPrincipal, detallesTecnicos,
-      latitud, longitud, zona, universidadCercana
-    } = req.body;
+    nombre, metros2, direccion, costo, tipo, descripcion,
+    imagenes, servicios, amenidades, reglas, imagenPrincipal, detallesTecnicos,
+    latitud, longitud, zona, universidadCercana,
+    horariosVisita
+  } = req.body;
 
     const duenoId = req.user._id;
 
@@ -45,6 +46,7 @@ export const crearInmueble = async (req, res) => {
       tipo,
       detallesTecnicos,
       descripcion,
+      horariosVisita,
       imagenPrincipal: urlImagenPrincipal,
       imagenes: imagenesUrls,
       servicios,

@@ -15,6 +15,7 @@ const inmuebleSchema = new mongoose.Schema({
   descripcion: { type: String },
   imagenPrincipal: {type: String },
   imagenes: [{ type: String, default: [] }],
+  horariosVisita: [{ type: String }],
   servicios: [{ type: mongoose.Schema.Types.ObjectId, ref: "Servicio" }],
   amenidades: [{ type: mongoose.Schema.Types.ObjectId, ref: "Amenidad" }],
   reglas: [{ type: mongoose.Schema.Types.ObjectId, ref: "Regla" }]

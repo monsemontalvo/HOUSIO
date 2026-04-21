@@ -103,15 +103,37 @@ export const logout = (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { profilePic } = req.body;
+    // Ahora recibimos todo lo que el usuario quiera cambiar
+    const { profilePic, fullName, email } = req.body;
     const userId = req.user._id;
 
-    if (!profilePic) {
-      return res.status(400).json({ message: "La imagen de perfil es requerida" });
+    // Objeto vacío donde guardaremos solo lo que realmente cambió
+    let dataToUpdate = {};
+
+    if (fullName) dataToUpdate.fullName = fullName;
+
+    // Si intenta cambiar el correo, verificamos que no esté usado por alguien más
+    if (email && email !== req.user.email) {
+      const emailExists = await User.findOne({ email, _id: { $ne: userId } });
+      if (emailExists) {
+        return res.status(400).json({ message: "Este correo ya está en uso por otra cuenta" });
+      }
+      dataToUpdate.email = email;
     }
 
-    const uploadResult = await cloudinary.uploader.upload(profilePic);
-    const updatedUser = await User.findByIdAndUpdate(userId, { profilePic: uploadResult.secure_url }, { new: true });
+    // Si mandó una foto nueva, la subimos a Cloudinary
+    if (profilePic) {
+      const uploadResult = await cloudinary.uploader.upload(profilePic, { folder: "housio_avatars" });
+      dataToUpdate.profilePic = uploadResult.secure_url;
+    }
+
+    // Si el objeto está vacío, significa que no cambió nada
+    if (Object.keys(dataToUpdate).length === 0) {
+      return res.status(400).json({ message: "No se enviaron datos para actualizar" });
+    }
+
+    // Actualizamos al usuario en la base de datos
+    const updatedUser = await User.findByIdAndUpdate(userId, dataToUpdate, { new: true });
 
     res.status(200).json(updatedUser);
   } catch (error) {

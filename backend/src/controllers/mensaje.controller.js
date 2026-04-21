@@ -1,6 +1,7 @@
 import Mensaje from "../models/Mensaje.model.js";
 import User from "../models/user.model.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import { enviarNotificacion } from "../lib/notificacion.utils.js";
 
 // --- 1. OBTENER HISTORIAL DE CHAT CON UN USUARIO ---
 export const obtenerMensajes = async (req, res) => {
@@ -47,6 +48,15 @@ export const enviarMensaje = async (req, res) => {
       // Si sí está conectado, le disparamos el mensaje en tiempo real a su pantalla
       io.to(receiverSocketId).emit("nuevoMensaje", nuevoMensaje);
     }
+
+    // --- NOTIFICACIÓN DE CHAT ---
+    await enviarNotificacion({
+      receptor: destinatarioId,
+      emisor: remitenteId,
+      tipo: "mensaje",
+      referenciaId: nuevoMensaje._id,
+      texto: `Tienes un nuevo mensaje`
+    });
 
     // Le respondemos al que envió el mensaje que todo salió bien
     res.status(201).json(nuevoMensaje);

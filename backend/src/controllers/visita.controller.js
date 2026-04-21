@@ -1,5 +1,6 @@
 import Visita from "../models/Visita.model.js";
 import Inmueble from "../models/Inmueble.model.js";
+import { enviarNotificacion } from "../lib/notificacion.utils.js";
 
 // --- 1. AGENDAR UNA VISITA (Inquilino) ---
 export const agendarVisita = async (req, res) => {
@@ -31,6 +32,16 @@ export const agendarVisita = async (req, res) => {
     });
 
     await nuevaVisita.save();
+
+    // --- NOTIFICACIÓN AL DUEÑO ---
+    await enviarNotificacion({
+      receptor: inmueble.dueno,
+      emisor: inquilinoId,
+      tipo: "visita",
+      referenciaId: nuevaVisita._id,
+      texto: `Nueva solicitud de visita para "${inmueble.nombre}" el ${fecha} a las ${hora}`
+    });
+
     res.status(201).json(nuevaVisita);
 
   } catch (error) {
@@ -93,11 +104,20 @@ export const actualizarEstadoVisita = async (req, res) => {
       id,
       { estado },
       { new: true }
-    );
+    ).populate("inmueble", "nombre");
 
     if (!visitaActualizada) {
       return res.status(404).json({ message: "Visita no encontrada" });
     }
+
+    // --- NOTIFICACIÓN AL ESTUDIANTE ---
+    await enviarNotificacion({
+      receptor: visitaActualizada.inquilino,
+      emisor: req.user._id, // El dueño actual
+      tipo: "visita",
+      referenciaId: visitaActualizada._id,
+      texto: `Tu visita a "${visitaActualizada.inmueble.nombre}" ha sido ${estado.toLowerCase()}`
+    });
 
     res.status(200).json(visitaActualizada);
   } catch (error) {

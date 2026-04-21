@@ -1,10 +1,16 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
-import { User, Mail, Calendar, Camera, Save, Loader } from 'lucide-react';
+import { User, Mail, Calendar, Camera, Save, Loader, Edit2 } from 'lucide-react';
 
 const EditProfilePage = () => {
   const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
+  
+  // Estados para manejar los datos del formulario
   const [selectedImg, setSelectedImg] = useState(null);
+  const [formData, setFormData] = useState({
+    fullName: authUser?.fullName || "",
+    email: authUser?.email || ""
+  });
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -18,10 +24,25 @@ const EditProfilePage = () => {
     };
   };
 
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  //El botón de guardar solo aparece si algo realmente cambió
+  const hasChanges = 
+    selectedImg !== null || 
+    formData.fullName !== authUser?.fullName || 
+    formData.email !== authUser?.email;
+
   const handleUpdateProfile = async () => {
-    if (!selectedImg) return;
-    await updateProfile({ profilePic: selectedImg });
-    setSelectedImg(null); // Limpiar preview tras subir
+    if (!hasChanges) return;
+    
+    // Armamos el paquete con lo que vamos a enviar
+    const dataToSend = { ...formData };
+    if (selectedImg) dataToSend.profilePic = selectedImg;
+
+    await updateProfile(dataToSend);
+    setSelectedImg(null); // Limpiamos la preview porque el authUser ya se actualizó
   };
 
   return (
@@ -36,7 +57,7 @@ const EditProfilePage = () => {
         
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Tu Perfil</h1>
-          <p className="text-gray-400">Gestiona tu imagen y visualiza tus datos</p>
+          <p className="text-gray-400">Gestiona tu imagen y actualiza tus datos</p>
         </div>
 
         {/* --- SECCIÓN DE FOTO DE PERFIL --- */}
@@ -44,28 +65,22 @@ const EditProfilePage = () => {
           <div className="relative group">
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white/10 shadow-xl relative">
               <img
-                src={selectedImg || authUser.profilePic || "/UserPlaceholder.png"}
+                src={selectedImg || authUser.profilePic || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"}
                 alt="Profile"
                 className="w-full h-full object-cover object-center"
               />
-              {/* Overlay oscuro al hacer hover */}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
                 <Camera className="w-8 h-8 text-white" />
               </div>
             </div>
             
-            {/* Botón Flotante para subir foto */}
             <label 
               htmlFor="avatar-upload" 
               className={`absolute bottom-0 right-0 p-2.5 rounded-full cursor-pointer transition-all shadow-lg border border-neutral-800
                 ${isUpdatingProfile ? "bg-gray-600 cursor-not-allowed" : "bg-orange-600 hover:bg-orange-700 text-white"}
               `}
             >
-              {isUpdatingProfile ? (
-                <Loader className="w-5 h-5 animate-spin" />
-              ) : (
-                <Camera className="w-5 h-5" />
-              )}
+              {isUpdatingProfile ? <Loader className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
               <input
                 type="file"
                 id="avatar-upload"
@@ -76,49 +91,53 @@ const EditProfilePage = () => {
               />
             </label>
           </div>
-
-          <p className="text-sm text-gray-500">
-            {isUpdatingProfile ? "Subiendo..." : "Haz clic en la cámara para cambiar tu foto"}
-          </p>
+          <p className="text-sm text-gray-500">Haz clic en la cámara para cambiar tu foto</p>
         </div>
 
-        {/* --- DATOS DEL USUARIO (SOLO LECTURA) --- */}
+        {/* --- DATOS DEL USUARIO --- */}
         <div className="space-y-6">
           
-          {/* Nombre Completo */}
-          <div className="space-y-2">
+          <div className="space-y-2 relative">
             <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
               <User className="w-4 h-4 text-orange-500" /> Nombre Completo
             </label>
-            <div className="w-full px-4 py-3 rounded-xl bg-black/30 border border-white/10 text-gray-300 cursor-not-allowed select-none">
-              {authUser?.fullName}
-            </div>
+            <input 
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              className="input w-full px-4 py-3 rounded-xl bg-black/30 border border-white/10 text-white focus:border-orange-500 focus:bg-black/50 transition-all"
+            />
+            <Edit2 className="w-4 h-4 text-gray-500 absolute right-4 top-10 pointer-events-none" />
           </div>
 
-          {/* Correo */}
-          <div className="space-y-2">
+          <div className="space-y-2 relative">
             <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
               <Mail className="w-4 h-4 text-blue-500" /> Correo Electrónico
             </label>
-            <div className="w-full px-4 py-3 rounded-xl bg-black/30 border border-white/10 text-gray-300 cursor-not-allowed select-none">
-              {authUser?.email}
-            </div>
+            <input 
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              className="input w-full px-4 py-3 rounded-xl bg-black/30 border border-white/10 text-white focus:border-blue-500 focus:bg-black/50 transition-all"
+            />
+            <Edit2 className="w-4 h-4 text-gray-500 absolute right-4 top-10 pointer-events-none" />
           </div>
 
-          {/* Miembro Desde */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
               <Calendar className="w-4 h-4 text-green-500" /> Miembro Desde
             </label>
-            <div className="w-full px-4 py-3 rounded-xl bg-black/30 border border-white/10 text-gray-300 cursor-not-allowed select-none">
+            <div className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/5 text-gray-500 cursor-not-allowed select-none">
               {authUser?.createdAt?.split("T")[0] || "Fecha no disponible"}
             </div>
           </div>
 
         </div>
 
-        {/* --- BOTÓN DE GUARDAR (solo aparece si se selecciona una imagen) --- */}
-        {selectedImg && (
+        {/* --- BOTÓN DE GUARDAR --- */}
+        {hasChanges && (
           <div className="mt-8 animate-fade-in-up">
             <button
               onClick={handleUpdateProfile}
@@ -126,13 +145,9 @@ const EditProfilePage = () => {
               className="w-full btn bg-orange-600 hover:bg-orange-700 text-white border-none rounded-xl h-12 text-lg shadow-lg shadow-orange-900/20 gap-2"
             >
               {isUpdatingProfile ? (
-                <>
-                  <Loader className="size-5 animate-spin" /> Guardando...
-                </>
+                <><Loader className="size-5 animate-spin" /> Guardando...</>
               ) : (
-                <>
-                  <Save className="size-5" /> Guardar Cambios
-                </>
+                <><Save className="size-5" /> Guardar Cambios</>
               )}
             </button>
           </div>

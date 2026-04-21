@@ -1,6 +1,6 @@
 //lo primero que se ejecuta al iniciar el servidor.
 // aqui se configura el servidor Express, se conectan las rutas y se establece la conexión con la bd.
-
+import notificacionRoutes from "./routes/notificacion.route.js";
 import express from 'express';
 import authRoutes from './routes/auth.route.js'; //importar rutas de autenticación
 import dotenv from 'dotenv'; //dotenv: librería que permite cargar variables de entorno desde un archivo .env
@@ -40,6 +40,7 @@ app.use("/api/visitas", visitaRoutes);
 app.use("/api/mensajes", mensajeRoutes);
 app.use("/api/resenas", resenaRoutes);
 app.use("/api/contacto", contactoRoutes);
+app.use("/api/notificaciones", notificacionRoutes);
 //app.listen enciende el servidor-> llama a la función connectDB -> busca la bd de MongoDB Atlas y se conecta
 /*app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
