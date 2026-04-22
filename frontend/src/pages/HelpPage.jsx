@@ -113,7 +113,7 @@ const HelpPage = () => {
                 </div>
                 <div className="flex items-center gap-4 text-gray-300">
                   <div className="bg-white/10 p-3 rounded-xl text-blue-400"><Phone className="size-6" /></div>
-                  <span>+52 (81) 1234 5678</span>
+                  <span>+52 (81) 2568 9577</span>
                 </div>
               </div>
             </div>

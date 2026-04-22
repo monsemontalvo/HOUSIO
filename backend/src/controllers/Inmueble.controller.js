@@ -4,6 +4,9 @@ import Servicio from "../models/Servicio.model.js";
 import Amenidad from "../models/Amenidad.model.js";
 import Regla from "../models/Regla.model.js";
 import Visita from "../models/Visita.model.js";
+import Resena from "../models/Reseña.model.js"; 
+import Mensaje from "../models/Mensaje.model.js";
+import { enviarNotificacion } from "../lib/notificacion.utils.js";
 
 // --- 1. CREAR UN NUEVO INMUEBLE ---
 export const crearInmueble = async (req, res) => {
@@ -177,7 +180,7 @@ export const actualizarInmueble = async (req, res) => {
   }
 };
 
-// --- 5. ELIMINAR INMUEBLE ---
+// --- 5. ELIMINAR INMUEBLE Y NOTIFICAR ESTUDIANTES ---
 export const eliminarInmueble = async (req, res) => {
   try {
     const { id } = req.params;
@@ -189,8 +192,33 @@ export const eliminarInmueble = async (req, res) => {
       return res.status(403).json({ message: "No tienes permiso para eliminar esto" });
     }
 
+    // 1. Buscar estudiantes con visitas "Pendientes" o "Confirmadas"
+    const visitasActivas = await Visita.find({
+      inmueble: id,
+      estado: { $in: ["Pendiente", "Confirmada"] }
+    });
+
+    // 2. Enviar notificación a cada estudiante afectado
+    // Usamos un for...of para poder usar await dentro del ciclo
+    for (const visita of visitasActivas) {
+      await enviarNotificacion({
+        receptor: visita.inquilino,
+        emisor: req.user._id, // El dueño
+        tipo: "sistema", // Usamos "sistema" porque la casa ya no existirá para darle clic
+        referenciaId: null, 
+        texto: `La propiedad "${inmueble.nombre}" a la que tenías una visita agendada ya no está disponible o se rentó. Lo sentimos mucho. Por favor, revisa otras opciones disponibles.`,
+      });
+    }
+
+    // 3. LIMPIEZA EN CASCADA (Borrar la basura de la Base de Datos)
+    await Visita.deleteMany({ inmueble: id });
+    await Resena.deleteMany({ inmueble: id });
+    await Mensaje.deleteMany({ inmueble: id });
+
+    // 5. Destrucción final del inmueble
     await Inmueble.findByIdAndDelete(id);
-    res.status(200).json({ message: "Inmueble eliminado correctamente" });
+
+    res.status(200).json({ message: "Inmueble eliminado, estudiantes notificados y registros limpiados correctamente" });
   } catch (error) {
     console.log("Error en eliminarInmueble:", error.message);
     res.status(500).json({ message: "Error interno del servidor" });
