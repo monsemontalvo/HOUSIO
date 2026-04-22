@@ -54,7 +54,7 @@ export const enviarMensaje = async (req, res) => {
       receptor: destinatarioId,
       emisor: remitenteId,
       tipo: "mensaje",
-      referenciaId: nuevoMensaje._id,
+      referenciaId: remitenteId,
       texto: `Tienes un nuevo mensaje`
     });
 

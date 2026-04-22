@@ -82,7 +82,7 @@ export const crearResena = async (req, res) => {
         receptor: inmuebleInfo.dueno,
         emisor: autorId,
         tipo: "resena",
-        referenciaId: nuevaResena._id,
+        referenciaId: inmuebleId,
         texto: `Han dejado una reseña de ${calificacion} estrellas en "${inmuebleInfo.nombre}"`
       });
     }

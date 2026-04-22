@@ -3,27 +3,27 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Home, Bell, User, HelpCircle, LogOut, MessageSquare, Calendar, Star } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNotificacionStore } from '../store/useNotificacionStore';
-import { useChatStore } from '../store/useChatStore'; 
+import { useChatStore } from '../store/useChatStore';
 
 const Navbar = () => {
-  const { authUser, logout } = useAuthStore(); 
+  const { authUser, logout } = useAuthStore();
   const { socket, connectSocket, disconnectSocket } = useChatStore();
   const navigate = useNavigate();
 
-  const { 
-    notificaciones, 
-    unreadCount, 
-    getNotificaciones, 
-    marcarComoLeida, 
-    suscribirseNotificaciones, 
-    desuscribirseNotificaciones 
+  const {
+    notificaciones,
+    unreadCount,
+    getNotificaciones,
+    marcarComoLeida,
+    suscribirseNotificaciones,
+    desuscribirseNotificaciones
   } = useNotificacionStore();
 
   // 1. Cuando el usuario inicia sesión: descarga notificaciones y enciende el socket
   useEffect(() => {
     if (authUser) {
       getNotificaciones();
-      connectSocket(); 
+      connectSocket();
     } else {
       disconnectSocket();
     }
@@ -84,15 +84,38 @@ const Navbar = () => {
                   )}
                 </div>
               </div>
-              
+
               <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-2xl bg-neutral-900 border border-white/10 rounded-2xl w-80 mt-4 max-h-[400px] overflow-y-auto custom-scrollbar">
                 <li className="menu-title text-white font-bold text-sm pb-2 mb-2 border-b border-white/10">
                   Notificaciones ({unreadCount} nuevas)
                 </li>
-                
+
                 {notificaciones.map((notif) => (
                   <li key={notif._id}>
-                    <a onClick={() => marcarComoLeida(notif._id)} className="flex items-start gap-3 hover:bg-white/5 py-3 px-2 rounded-xl transition-colors cursor-pointer">
+                    <a onClick={() => {
+                      // 1. Marcamos como leída 
+                      marcarComoLeida(notif._id);
+
+                      // 2. Lógica de redirección por tipo
+                      if (notif.referenciaId) {
+                        if (notif.tipo === 'resena') {
+                          navigate(`/product/${notif.referenciaId}`);
+                        }
+                        else if (notif.tipo === 'mensaje') {
+                          // El referenciaId ahora es el ID del usuario que mandó el mensaje
+                          navigate(`/chat`);
+                          
+                        }
+                        else if (notif.tipo === 'visita') {
+                          navigate(`/visits`);
+                        }
+                      }
+
+                      // 3. cierra el menú desplegable automáticamente
+                      const elem = document.activeElement;
+                      if (elem) elem.blur();
+
+                    }} className="flex items-start gap-3 hover:bg-white/5 py-3 px-2 rounded-xl transition-colors cursor-pointer">
                       <div className={`p-2 rounded-full shrink-0 mt-0.5
                         ${notif.tipo === 'resena' ? 'bg-yellow-500/20 text-yellow-500' : ''}
                         ${notif.tipo === 'visita' ? 'bg-green-500/20 text-green-500' : ''}
@@ -102,7 +125,7 @@ const Navbar = () => {
                         {notif.tipo === 'visita' && <Calendar size={16} />}
                         {notif.tipo === 'mensaje' && <MessageSquare size={16} />}
                       </div>
-                      
+
                       <div className="flex flex-col gap-1">
                         <span className={`text-sm leading-tight ${notif.leida ? 'text-gray-400 font-normal' : 'text-white font-bold'}`}>
                           {notif.texto}
@@ -111,7 +134,7 @@ const Navbar = () => {
                     </a>
                   </li>
                 ))}
-                
+
                 {notificaciones.length === 0 && (
                   <div className="text-center py-6 text-gray-500 text-sm">
                     No tienes notificaciones
