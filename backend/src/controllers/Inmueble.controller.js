@@ -3,6 +3,7 @@ import cloudinary from "../lib/cloudinary.js";
 import Servicio from "../models/Servicio.model.js";
 import Amenidad from "../models/Amenidad.model.js";
 import Regla from "../models/Regla.model.js";
+import Visita from "../models/Visita.model.js";
 
 // --- 1. CREAR UN NUEVO INMUEBLE ---
 export const crearInmueble = async (req, res) => {
@@ -73,13 +74,32 @@ export const crearInmueble = async (req, res) => {
 // --- 2. OBTENER TODOS LOS INMUEBLES ---
 export const obtenerInmuebles = async (req, res) => {
   try {
+    // Usamos .lean() para que Mongoose nos devuelva objetos JS simples y podamos agregarles campos
     const inmuebles = await Inmueble.find()
-      .populate("dueno", "fullName profilePic email createdAt")
+      .populate("dueno", "fullName profilePic email createdAt esSuperAnfitrion calificacionPromedio")
       .populate("servicios")
       .populate("amenidades")
-      .populate("reglas");
+      .populate("reglas")
+      .lean();
 
-    res.status(200).json(inmuebles);
+    // Traemos las visitas que ya estén confirmadas para hacer el conteo real
+    const visitasConfirmadas = await Visita.find({ estado: "Confirmada" });
+
+    // Creamos un mapa de conteo: { "id_inmueble": cantidad }
+    const conteoVisitas = {};
+    visitasConfirmadas.forEach(v => {
+      const id = v.inmueble.toString();
+      conteoVisitas[id] = (conteoVisitas[id] || 0) + 1;
+    });
+
+    // Mapeamos los inmuebles para inyectar el valor de "esMasAgendado"
+    const inmueblesProcesados = inmuebles.map(inm => ({
+      ...inm,
+      // Validación: Si tiene 2 o más visitas confirmadas, sale la insignia
+      esMasAgendado: (conteoVisitas[inm._id.toString()] || 0) >= 2 
+    }));
+
+    res.status(200).json(inmueblesProcesados);
   } catch (error) {
     console.log("Error en obtenerInmuebles:", error.message);
     res.status(500).json({ message: "Error interno del servidor" });
@@ -90,9 +110,15 @@ export const obtenerInmuebles = async (req, res) => {
 export const obtenerInmueblePorId = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log("--> Alguien entró a ver el inmueble:", id); // AGREGA ESTO
 
-    const inmueble = await Inmueble.findById(id)
-      .populate("dueno", "fullName profilePic email createdAt")
+    // findById solo busca. Para aumentar los clicks necesitamos findByIdAndUpdate.
+    const inmueble = await Inmueble.findByIdAndUpdate(
+      id,
+      { $inc: { clicks: 1 } }, // Esto le suma 1 al campo 'clicks' automáticamente
+      { new: true } // Esto le dice a Mongoose que nos devuelva el objeto ya actualizado
+    )
+      .populate("dueno", "fullName profilePic email createdAt esSuperAnfitrion calificacionPromedio")
       .populate("servicios")
       .populate("amenidades")
       .populate("reglas");

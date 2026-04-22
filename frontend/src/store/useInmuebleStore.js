@@ -84,16 +84,16 @@ export const useInmuebleStore = create((set, get) => ({
   getInmuebleById: async (id) => {
     set({ isLoading: true });
     try {
-      // Obtenemos todas y filtramos para no modificar tu backend actual
-      const res = await axiosInstance.get("/inmuebles");
-      const found = res.data.find(i => i._id === id);
-      set({ currentInmueble: found });
+      // ESTE CAMBIO ES VITAL: Llamamos directamente al ID de la propiedad
+      const res = await axiosInstance.get(`/inmuebles/${id}`); 
+      set({ currentInmueble: res.data });
     } catch (error) {
       toast.error("Error al cargar detalles de la propiedad");
     } finally {
       set({ isLoading: false });
     }
   },
+
   actualizarInmueble: async (id, data) => {
     set({ isLoading: true });
     try {

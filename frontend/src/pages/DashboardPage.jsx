@@ -9,7 +9,8 @@ import {
   Plus, Building, User, Edit, Trash2, Loader,
   Droplets, CheckCircle, Flame, Building2, BellOff,
   Cigarette, Clock, Funnel, FunnelPlus,
-  University, Dumbbell, BookOpen, ShieldCheck, ChefHat
+  University, Dumbbell, BookOpen, ShieldCheck, ChefHat,
+  Crown, CalendarCheck, CheckCircle2, TrendingUp
 } from 'lucide-react';
 
 // ======================================================================
@@ -81,19 +82,17 @@ const StudentDashboard = ({ authUser }) => {
   const { inmuebles, getInmuebles, isLoading } = useInmuebleStore();
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
-  // ESTADOS PARA LOS FILTROS
   const [busqueda, setBusqueda] = useState("");
   const [tipoFiltro, setTipoFiltro] = useState("Todos");
   const [precioFiltro, setPrecioFiltro] = useState("Todos");
   
-  // NUEVOS ESTADOS PARA PRECIO PERSONALIZADO
   const [precioMin, setPrecioMin] = useState("");
   const [precioMax, setPrecioMax] = useState("");
   
   const [filtrosActivos, setFiltrosActivos] = useState([]);
 
   const [paginaActual, setPaginaActual] = useState(1);
-  const inmueblesPorPagina = 12;//Cantidad maxima de inmuebles por pagina
+  const inmueblesPorPagina = 12;
 
   useEffect(() => {
     getInmuebles();
@@ -103,10 +102,9 @@ const StudentDashboard = ({ authUser }) => {
     setFiltrosActivos(prev =>
       prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
     );
-    setPaginaActual(1); // Reiniciar paginación al cambiar filtros
+    setPaginaActual(1);
   };
 
-  // EL MOTOR DE BÚSQUEDA
   const inmueblesFiltrados = inmuebles.filter((prop) => {
     const textoParaFiltrar = `
     ${prop.nombre} 
@@ -117,7 +115,6 @@ const StudentDashboard = ({ authUser }) => {
 
     const coincideTipo = tipoFiltro === "Todos" || prop.tipo === tipoFiltro;
 
-    // LOGICA ACTUALIZADA DE PRECIOS
     let coincidePrecio = true;
     const costoNum = Number(prop.costo);
 
@@ -173,7 +170,6 @@ const StudentDashboard = ({ authUser }) => {
     return coincideBusqueda && coincideTipo && coincidePrecio && coincideRapido;
   });
 
-  // Cálculos de paginacion
   const indiceUltimoInmueble = paginaActual * inmueblesPorPagina;
   const indicePrimerInmueble = indiceUltimoInmueble - inmueblesPorPagina;
   const inmueblesPaginados = inmueblesFiltrados.slice(indicePrimerInmueble, indiceUltimoInmueble);
@@ -181,7 +177,6 @@ const StudentDashboard = ({ authUser }) => {
 
   return (
     <div className="relative z-10 max-w-7xl mx-auto space-y-10">
-      {/* Encabezado */}
       <div className="flex flex-col items-center text-center space-y-8">
         <div className="text-white space-y-2">
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
@@ -192,7 +187,6 @@ const StudentDashboard = ({ authUser }) => {
           </p>
         </div>
 
-        {/* Barra de Filtros */}
         <div className="w-full max-w-5xl bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl transition-all hover:bg-white/10">
           <div className="flex flex-col lg:flex-row gap-4 mb-4">
             <div className="flex-1 relative group">
@@ -252,7 +246,6 @@ const StudentDashboard = ({ authUser }) => {
               </select>
             </div>
             
-            {/* INPUTS MIN/MAX DE PRECIO PERSONALIZADO */}
             <div className="w-full">
               {precioFiltro === "Personalizado" ? (
                 <div className="flex gap-2 items-center">
@@ -283,7 +276,6 @@ const StudentDashboard = ({ authUser }) => {
               )}
             </div>
 
-            {/* Barra de Filtros */}
             <div className="flex justify-start mt-4">
               <button
                 onClick={() => setIsFilterModalOpen(true)}
@@ -321,7 +313,6 @@ const StudentDashboard = ({ authUser }) => {
         </div>
       </div>
 
-      {/* Grid Resultados Filtrados */}
       {isLoading ? (
         <div className="flex justify-center py-20">
           <Loader className="size-12 animate-spin text-orange-600" />
@@ -361,13 +352,34 @@ const StudentDashboard = ({ authUser }) => {
                 to={`/product/${prop._id}`}
                 className="group bg-white/5 backdrop-blur-lg border border-white/10 rounded-3xl overflow-hidden hover:bg-white/10 hover:border-orange-500/30 hover:shadow-[0_0_30px_-5px_rgba(234,88,12,0.15)] transition-all duration-300 flex flex-col cursor-pointer"
               >
-                {/* Contenedor de la Imagen */}
                 <div className="relative h-64 overflow-hidden bg-black/50">
                   <img
                     src={prop.imagenPrincipal || (prop.imagenes?.length > 0 ? prop.imagenes[0] : "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2670")}
                     alt={prop.nombre}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
+
+                  {/* INSIGNIAS DE CONFIANZA (BADGES) REALES */}
+                  <div className="absolute top-3 left-3 flex flex-col items-start gap-2 z-20">
+                    {(prop.dueno?.esSuperAnfitrion || prop.esSuperAnfitrion) && (
+                      <div className="flex items-center gap-1.5 bg-yellow-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
+                       <Crown className="size-3.5 fill-current" /> Súper Anfitrión
+                      </div>
+                    )}
+
+                    {prop.esMasAgendado && (
+                      <div className="flex items-center gap-1.5 bg-blue-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
+                        <CheckCircle2 className="size-3.5" /> Más Agendado
+                      </div>
+                    )}
+
+                    {prop.clicks >= 5 && (
+                      <div className="flex items-center gap-1.5 bg-orange-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
+                        <Flame className="size-3.5 fill-current" /> {prop.clicks} personas vieron esto
+                      </div>
+                    )}
+                  </div>
+
                   <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl text-white font-bold border border-white/10 shadow-lg">
                     ${prop.costo}<span className="text-xs font-normal text-gray-300">/mes</span>
                   </div>
@@ -376,7 +388,6 @@ const StudentDashboard = ({ authUser }) => {
                   </div>
                 </div>
 
-                {/* Contenido de la Card */}
                 <div className="p-6 flex flex-col flex-1">
                   <div className="mb-4">
                     <h3 className="text-xl font-bold text-white leading-tight mb-2 group-hover:text-orange-400 transition-colors">
@@ -413,11 +424,8 @@ const StudentDashboard = ({ authUser }) => {
             );
           })}
         </div>
-
-
-
       )}
-      {/* MODAL DE FILTROS */}
+
       <div className={`modal ${isFilterModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box bg-neutral-900 border border-white/10 max-w-2xl text-white">
           <div className="flex justify-between items-center mb-6">
@@ -425,8 +433,6 @@ const StudentDashboard = ({ authUser }) => {
           </div>
 
           <div className="space-y-8 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-
-            {/* SECCION: SERVICIOS */}
             <section>
               <h4 className="flex items-center gap-2 text-orange-500 font-bold mb-4">
                 <Zap className="size-4" /> Servicios
@@ -445,8 +451,6 @@ const StudentDashboard = ({ authUser }) => {
                 ))}
               </div>
             </section>
-
-            {/* SECCION: AMENIDADES */}
             <section>
               <h4 className="flex items-center gap-2 text-blue-500 font-bold mb-4">
                 <Home className="size-4" /> Amenidades
@@ -466,8 +470,6 @@ const StudentDashboard = ({ authUser }) => {
                 ))}
               </div>
             </section>
-
-            {/* SECCION: REGLAS */}
             <section>
               <h4 className="flex items-center gap-2 text-pink-500 font-bold mb-4">
                 <BellOff className="size-4" /> Reglas
@@ -502,7 +504,6 @@ const StudentDashboard = ({ authUser }) => {
         </div>
       </div>
 
-      {/* CONTROLES DE PAGINACIÓN */}
       {totalPaginas > 1 && (
         <div className="flex justify-center items-center gap-2 pb-10">
           <button
@@ -534,10 +535,7 @@ const StudentDashboard = ({ authUser }) => {
           </button>
         </div>
       )}
-
     </div>
-
-
   );
 };
 
@@ -545,6 +543,9 @@ const StudentDashboard = ({ authUser }) => {
 // 2. COMPONENTE DE RENTERO
 // ======================================================================
 const LandlordDashboard = () => {
+  // LA LÍNEA QUE FALTABA Y ROMPIÓ LA PÁGINA:
+  const { authUser } = useAuthStore(); 
+  
   const {
     misInmuebles, getMisInmueblesAnfitrion, crearInmueble, eliminarInmueble,
     actualizarInmueble, catalogos, getCatalogos, isLoading
@@ -574,6 +575,31 @@ const estadoInicialForm = {
     getVisitasAnfitrion();
     getCatalogos();
   }, [getMisInmueblesAnfitrion, getVisitasAnfitrion, getCatalogos]);
+
+  // CÁLCULOS DINÁMICOS DE REPORTES PARA EL ANFITRIÓN
+  const masPopular = misInmuebles.length > 0 
+    ? [...misInmuebles].sort((a, b) => (b.clicks || 0) - (a.clicks || 0))[0] 
+    : null;
+
+  const conteoVisitas = {};
+  visitasRecibidas.forEach(v => {
+    const id = v.inmueble?._id || v.inmueble;
+    if (id) conteoVisitas[id] = (conteoVisitas[id] || 0) + 1;
+  });
+  
+  let maxVisitas = 0;
+  let masAgendadoId = null;
+  Object.entries(conteoVisitas).forEach(([id, count]) => {
+    if (count > maxVisitas) {
+      maxVisitas = count;
+      masAgendadoId = id;
+    }
+  });
+  const masAgendado = misInmuebles.find(i => i._id === masAgendadoId);
+
+  const totalClicks = misInmuebles.reduce((sum, prop) => sum + (prop.clicks || 0), 0);
+  const totalCitas = visitasRecibidas.length;
+  const conversionRate = totalClicks > 0 ? ((totalCitas / totalClicks) * 100).toFixed(1) : 0;
 
   const handleMainImageChange = (e) => {
     const file = e.target.files[0];
@@ -704,7 +730,7 @@ const estadoInicialForm = {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6">
           <div className="flex items-center gap-4 mb-4">
             <div className="bg-blue-500/20 p-3 rounded-xl text-blue-400"><Building className="size-6" /></div>
@@ -719,6 +745,67 @@ const estadoInicialForm = {
           </div>
           <span className="text-4xl font-bold text-white">{visitasPendientes}</span>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        
+        {/* 1. Súper Anfitrión */}
+        <div className={`bg-gradient-to-br border p-6 rounded-2xl flex items-center gap-5 shadow-lg ${
+          authUser?.esSuperAnfitrion 
+            ? "from-yellow-500/20 to-neutral-900 border-yellow-500/50 shadow-yellow-500/10" 
+            : "from-gray-500/10 to-neutral-900 border-white/10 shadow-none"
+        }`}>
+          <div className={`p-4 rounded-full ${authUser?.esSuperAnfitrion ? "bg-yellow-500/20 text-yellow-500" : "bg-gray-500/20 text-gray-500"}`}>
+            <Crown className="size-8" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400 text-sm font-medium mb-1">Súper Anfitrión</p>
+              {authUser?.esSuperAnfitrion && <span className="badge badge-xs bg-yellow-500 border-none"></span>}
+            </div>
+            <h3 className="text-3xl font-bold text-white">
+              {authUser?.calificacionPromedio ? authUser.calificacionPromedio.toFixed(1) : "0.0"} 
+              <span className="text-lg text-gray-500 font-normal ml-1">/ 5.0</span>
+            </h3>
+          </div>
+        </div>
+
+        {/* 2. Más Agendado */}
+        <div className="bg-gradient-to-br from-blue-500/10 to-neutral-900 border border-blue-500/30 p-6 rounded-2xl flex items-center gap-5 shadow-lg shadow-blue-500/5">
+          <div className="p-4 bg-blue-500/20 rounded-full text-blue-500">
+            <CalendarCheck className="size-8" />
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-gray-400 text-sm font-medium mb-1">Más Agendado</p>
+            <h3 className="text-xl font-bold text-white truncate">{masAgendado ? masAgendado.nombre : "Aún sin citas"}</h3>
+            <p className="text-sm text-blue-400 mt-1">{maxVisitas} visitas agendadas</p>
+          </div>
+        </div>
+
+        {/* 3. Más Popular (Clics) */}
+        <div className="bg-gradient-to-br from-orange-500/10 to-neutral-900 border border-orange-500/30 p-6 rounded-2xl flex items-center gap-5 shadow-lg shadow-orange-500/5">
+          <div className="p-4 bg-orange-500/20 rounded-full text-orange-500">
+            <Flame className="size-8" />
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-gray-400 text-sm font-medium mb-1">Más Popular</p>
+            <h3 className="text-xl font-bold text-white truncate">{masPopular && masPopular.clicks > 0 ? masPopular.nombre : "Aún sin clics"}</h3>
+            <p className="text-sm text-orange-400 mt-1">{masPopular?.clicks || 0} clics totales</p>
+          </div>
+        </div>
+
+        {/* 4. Efectividad (Conversión) */}
+        <div className="bg-gradient-to-br from-green-500/10 to-neutral-900 border border-green-500/30 p-6 rounded-2xl flex items-center gap-5 shadow-lg shadow-green-500/5">
+          <div className="p-4 bg-green-500/20 rounded-full text-green-500">
+            <TrendingUp className="size-8" />
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-gray-400 text-sm font-medium mb-1">Efectividad</p>
+            <h3 className="text-3xl font-bold text-white">{conversionRate}%</h3>
+            <p className="text-sm text-green-400 mt-1">De {totalClicks} clics, tienes {totalCitas} citas</p>
+          </div>
+        </div>
+
       </div>
 
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 overflow-hidden">
@@ -823,7 +910,6 @@ const estadoInicialForm = {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Título */}
               <input
                 type="text"
                 placeholder="Título (Ej: Departamento cerca de Facultad de Medicina)"
@@ -833,7 +919,6 @@ const estadoInicialForm = {
                 required
               />
 
-              {/* Direccion */}
               <input
                 type="text"
                 placeholder="Dirección exacta (Calle y #)"
@@ -843,7 +928,6 @@ const estadoInicialForm = {
                 required
               />
 
-              {/* Zona */}
               <div className="w-full">
                 <input
                   list="zonas-list"
@@ -858,7 +942,6 @@ const estadoInicialForm = {
                 </datalist>
               </div>
 
-              {/* Selector de Universidad Cercana */}
               <div className="w-full">
                 <input
                   list="universidades-list"
@@ -873,7 +956,6 @@ const estadoInicialForm = {
                 </datalist>
               </div>
 
-              {/* Costo mensual */}
               <input
                 type="number"
                 placeholder="Costo mensual ($MXN)"
@@ -883,7 +965,6 @@ const estadoInicialForm = {
                 required
               />
 
-              {/* Tipo de propiedad */}
               <select
                 className="select w-full bg-black/30 border-white/10 focus:border-orange-500"
                 value={formData.tipo}
@@ -895,7 +976,6 @@ const estadoInicialForm = {
               </select>
             </div>
 
-            {/* Cordenadas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div className="space-y-1">
                 <label className="text-[10px] text-gray-500 ml-2 uppercase font-bold">Latitud</label>
@@ -921,7 +1001,6 @@ const estadoInicialForm = {
               </div>
             </div>
 
-            {/* PANEL DE DETALLES */}
             <div className="space-y-4 pt-4 border-t border-white/10">
               <label className="text-sm font-bold text-orange-500 uppercase">Detalles Personalizados</label>
               <div className="flex flex-col md:flex-row gap-2 bg-white/5 p-3 rounded-xl border border-white/10">
@@ -948,7 +1027,6 @@ const estadoInicialForm = {
                 </button>
               </div>
 
-              {/* Lista de lo que se va agregando */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {formData.detallesTecnicos.map((detalle, index) => (
                   <div
@@ -972,7 +1050,7 @@ const estadoInicialForm = {
             </div>
 
             <textarea placeholder="Descripción detallada" className="textarea w-full bg-black/30 border-white/10 h-24" value={formData.descripcion} onChange={e => setFormData({ ...formData, descripcion: e.target.value })} required></textarea>
-            {/* HORARIOS DE VISITA */}
+            
             <div className="space-y-4 pt-4 border-t border-white/10">
               <div>
                 <h4 className="font-bold text-sm text-green-400 mb-1 flex items-center gap-2">

@@ -25,6 +25,14 @@ const userSchema = new mongoose.Schema(
       enum: ["student", "landlord"], 
       default: "student", 
     },
+    calificacionPromedio: {
+      type: Number,
+      default: 0
+    },
+    esSuperAnfitrion: {
+      type: Boolean,
+      default: false
+    },
   },
   { timestamps: true }
 );

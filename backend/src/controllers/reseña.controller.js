@@ -1,6 +1,55 @@
 import Resena from "../models/Reseña.model.js";
 import Inmueble from "../models/Inmueble.model.js";
+import User from "../models/user.model.js"; // <-- NUEVO IMPORT AQUÍ
 import { enviarNotificacion } from "../lib/notificacion.utils.js";
+
+// ======================================================================
+// FUNCIÓN AYUDANTE (CON RASTREO DE ERRORES)
+// ======================================================================
+const actualizarPromedioAnfitrion = async (inmuebleId) => {
+  try {
+    console.log(`[DEBUG] 1. Iniciando cálculo para inmueble: ${inmuebleId}`);
+    
+    const inmueble = await Inmueble.findById(inmuebleId);
+    if (!inmueble) {
+      console.log("[DEBUG] Error: No se encontró el inmueble");
+      return;
+    }
+    const duenoId = inmueble.dueno;
+
+    const inmueblesDelDueno = await Inmueble.find({ dueno: duenoId }).select('_id');
+    const idsInmuebles = inmueblesDelDueno.map(inm => inm._id);
+    
+    console.log(`[DEBUG] 2. El dueño tiene ${idsInmuebles.length} propiedades.`);
+
+    const resenas = await Resena.find({ inmueble: { $in: idsInmuebles } }); 
+
+    console.log(`[DEBUG] 3. Se encontraron ${resenas.length} reseñas en total.`);
+
+    if (resenas.length === 0) return;
+
+    const suma = resenas.reduce((acc, curr) => acc + curr.calificacion, 0);
+    const promedio = (suma / resenas.length).toFixed(1);
+
+    console.log(`[DEBUG] 4. Matemática: Suma(${suma}) / Cantidad(${resenas.length}) = Promedio(${promedio})`);
+
+    const esSuper = Number(promedio) >= 4.5 && resenas.length >= 3;
+
+    await User.findByIdAndUpdate(duenoId, { 
+      calificacionPromedio: Number(promedio),
+      esSuperAnfitrion: esSuper
+    });
+
+    console.log(`[DEBUG] 5. ¡ÉXITO! Se guardó en la base de datos del usuario.`);
+
+  } catch (error) {
+    console.log("[DEBUG] ERROR FATAL al actualizar promedio del anfitrión:", error);
+  }
+};
+
+// ======================================================================
+// CONTROLADORES EXPORTADOS
+// ======================================================================
 
 // --- CREAR UNA RESEÑA ---
 export const crearResena = async (req, res) => {
@@ -20,6 +69,10 @@ export const crearResena = async (req, res) => {
     });
 
     await nuevaResena.save();
+
+    // ---> LLAMAMOS A LA FUNCIÓN AYUDANTE AQUÍ <---
+    await actualizarPromedioAnfitrion(inmuebleId);
+
     const resenaPoblada = await nuevaResena.populate("autor", "fullName profilePic");
 
     // --- NOTIFICACIÓN AL DUEÑO ---
@@ -77,6 +130,9 @@ export const actualizarResena = async (req, res) => {
     resena.calificacion = calificacion || resena.calificacion;
 
     await resena.save();
+
+    // ---> LLAMAMOS A LA FUNCIÓN AYUDANTE AQUÍ <---
+    await actualizarPromedioAnfitrion(resena.inmueble);
     
     // Devolvemos la reseña poblada para actualizar el estado del frontend
     const resenaActualizada = await Resena.findById(id).populate("autor", "fullName profilePic");

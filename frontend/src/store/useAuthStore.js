@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 // 1. IMPORTAMOS EL CLIENTE DE SOCKET.IO
 import { io } from "socket.io-client";
 
-const BASE_URL = "http://localhost:5000"; // La URL de tu backend
+const BASE_URL = "http://localhost:3000"; // La URL de tu backend
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
