@@ -4,7 +4,8 @@ import { toast } from "react-hot-toast";
 import { io } from "socket.io-client";
 import { useAuthStore } from "./useAuthStore.js";
 
-const BASE_URL = "http://localhost:3000";
+// frontend/src/store/useChatStore.js
+const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:3000" : "/";
 
 export const useChatStore = create((set, get) => ({
   mensajes: [],
@@ -68,7 +69,7 @@ export const useChatStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post(`/mensajes/send/${selectedUser._id}`, { contenido: texto });
       set({ mensajes: [...mensajes, res.data] });
-    } catch (error) {
+    } catch  { 
       toast.error("Error al enviar el mensaje");
     }
   },
