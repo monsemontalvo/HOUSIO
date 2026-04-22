@@ -22,7 +22,7 @@ const PORT = process.env.PORT;
 
 // Configuración de CORS
 app.use(cors({
-  origin: process.env.CLIENT_URL, /// "http://localhost:5173", // La URL de tu frontend
+  origin: "http://localhost:5173", // La URL de tu frontend
   credentials: true // SÚPER IMPORTANTE: Permite que pasen las cookies con el JWT
 }));
 
