@@ -10,7 +10,7 @@ import {
   Droplets, CheckCircle, Flame, Building2, BellOff,
   Cigarette, Clock, Funnel, FunnelPlus,
   University, Dumbbell, BookOpen, ShieldCheck, ChefHat,
-  Crown, CalendarCheck, CheckCircle2, TrendingUp
+  Crown, CalendarCheck, CheckCircle2, TrendingUp, Eye,
 } from 'lucide-react';
 
 // ======================================================================
@@ -85,10 +85,10 @@ const StudentDashboard = ({ authUser }) => {
   const [busqueda, setBusqueda] = useState("");
   const [tipoFiltro, setTipoFiltro] = useState("Todos");
   const [precioFiltro, setPrecioFiltro] = useState("Todos");
-  
+
   const [precioMin, setPrecioMin] = useState("");
   const [precioMax, setPrecioMax] = useState("");
-  
+
   const [filtrosActivos, setFiltrosActivos] = useState([]);
 
   const [paginaActual, setPaginaActual] = useState(1);
@@ -231,7 +231,7 @@ const StudentDashboard = ({ authUser }) => {
                 onChange={(e) => {
                   setPrecioFiltro(e.target.value);
                   setPaginaActual(1);
-                  if(e.target.value !== "Personalizado") {
+                  if (e.target.value !== "Personalizado") {
                     setPrecioMin("");
                     setPrecioMax("");
                   }
@@ -245,7 +245,7 @@ const StudentDashboard = ({ authUser }) => {
                 <option className="bg-neutral-900 text-white" value="Personalizado">Personalizado...</option>
               </select>
             </div>
-            
+
             <div className="w-full">
               {precioFiltro === "Personalizado" ? (
                 <div className="flex gap-2 items-center">
@@ -363,7 +363,7 @@ const StudentDashboard = ({ authUser }) => {
                   <div className="absolute top-3 left-3 flex flex-col items-start gap-2 z-20">
                     {(prop.dueno?.esSuperAnfitrion || prop.esSuperAnfitrion) && (
                       <div className="flex items-center gap-1.5 bg-yellow-500/90 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg">
-                       <Crown className="size-3.5 fill-current" /> Súper Anfitrión
+                        <Crown className="size-3.5 fill-current" /> Súper Anfitrión
                       </div>
                     )}
 
@@ -544,8 +544,8 @@ const StudentDashboard = ({ authUser }) => {
 // ======================================================================
 const LandlordDashboard = () => {
   // LA LÍNEA QUE FALTABA Y ROMPIÓ LA PÁGINA:
-  const { authUser } = useAuthStore(); 
-  
+  const { authUser } = useAuthStore();
+
   const {
     misInmuebles, getMisInmueblesAnfitrion, crearInmueble, eliminarInmueble,
     actualizarInmueble, catalogos, getCatalogos, isLoading
@@ -556,7 +556,7 @@ const LandlordDashboard = () => {
   const [editId, setEditId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-const estadoInicialForm = {
+  const estadoInicialForm = {
     nombre: "", direccion: "", costo: "", tipo: "Departamento", descripcion: "",
     servicios: [], amenidades: [], reglas: [], imagenPrincipal: "", detallesTecnicos: [],
     latitud: "", longitud: "", zona: "", universidadCercana: "",
@@ -577,8 +577,8 @@ const estadoInicialForm = {
   }, [getMisInmueblesAnfitrion, getVisitasAnfitrion, getCatalogos]);
 
   // CÁLCULOS DINÁMICOS DE REPORTES PARA EL ANFITRIÓN
-  const masPopular = misInmuebles.length > 0 
-    ? [...misInmuebles].sort((a, b) => (b.clicks || 0) - (a.clicks || 0))[0] 
+  const masPopular = misInmuebles.length > 0
+    ? [...misInmuebles].sort((a, b) => (b.clicks || 0) - (a.clicks || 0))[0]
     : null;
 
   const conteoVisitas = {};
@@ -586,7 +586,7 @@ const estadoInicialForm = {
     const id = v.inmueble?._id || v.inmueble;
     if (id) conteoVisitas[id] = (conteoVisitas[id] || 0) + 1;
   });
-  
+
   let maxVisitas = 0;
   let masAgendadoId = null;
   Object.entries(conteoVisitas).forEach(([id, count]) => {
@@ -748,13 +748,12 @@ const estadoInicialForm = {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        
+
         {/* 1. Súper Anfitrión */}
-        <div className={`bg-gradient-to-br border p-6 rounded-2xl flex items-center gap-5 shadow-lg ${
-          authUser?.esSuperAnfitrion 
-            ? "from-yellow-500/20 to-neutral-900 border-yellow-500/50 shadow-yellow-500/10" 
+        <div className={`bg-gradient-to-br border p-6 rounded-2xl flex items-center gap-5 shadow-lg ${authUser?.esSuperAnfitrion
+            ? "from-yellow-500/20 to-neutral-900 border-yellow-500/50 shadow-yellow-500/10"
             : "from-gray-500/10 to-neutral-900 border-white/10 shadow-none"
-        }`}>
+          }`}>
           <div className={`p-4 rounded-full ${authUser?.esSuperAnfitrion ? "bg-yellow-500/20 text-yellow-500" : "bg-gray-500/20 text-gray-500"}`}>
             <Crown className="size-8" />
           </div>
@@ -764,7 +763,7 @@ const estadoInicialForm = {
               {authUser?.esSuperAnfitrion && <span className="badge badge-xs bg-yellow-500 border-none"></span>}
             </div>
             <h3 className="text-3xl font-bold text-white">
-              {authUser?.calificacionPromedio ? authUser.calificacionPromedio.toFixed(1) : "0.0"} 
+              {authUser?.calificacionPromedio ? authUser.calificacionPromedio.toFixed(1) : "0.0"}
               <span className="text-lg text-gray-500 font-normal ml-1">/ 5.0</span>
             </h3>
           </div>
@@ -839,6 +838,13 @@ const estadoInicialForm = {
                   </td>
                   <td className="py-4 font-bold text-white">${inmueble.costo}</td>
                   <td className="py-4 text-right">
+                    <Link
+                      to={`/product/${inmueble._id}`}
+                      className="btn btn-ghost btn-square btn-sm text-orange-400 mr-2"
+                      title="Ver publicación"
+                    >
+                      <Eye className="size-4" />
+                    </Link>
                     <button onClick={() => abrirModalEditar(inmueble)} className="btn btn-ghost btn-square btn-sm text-blue-400 mr-2"><Edit className="size-4" /></button>
                     <button onClick={() => eliminarInmueble(inmueble._id)} className="btn btn-ghost btn-square btn-sm text-red-400"><Trash2 className="size-4" /></button>
                   </td>
@@ -1050,7 +1056,7 @@ const estadoInicialForm = {
             </div>
 
             <textarea placeholder="Descripción detallada" className="textarea w-full bg-black/30 border-white/10 h-24" value={formData.descripcion} onChange={e => setFormData({ ...formData, descripcion: e.target.value })} required></textarea>
-            
+
             <div className="space-y-4 pt-4 border-t border-white/10">
               <div>
                 <h4 className="font-bold text-sm text-green-400 mb-1 flex items-center gap-2">
@@ -1073,16 +1079,15 @@ const estadoInicialForm = {
                         onClick={() => {
                           setFormData(prev => ({
                             ...prev,
-                            horariosVisita: isSelected 
+                            horariosVisita: isSelected
                               ? prev.horariosVisita.filter(h => h !== hora)
                               : [...prev.horariosVisita, hora].sort()
                           }));
                         }}
-                        className={`badge badge-lg border-none cursor-pointer transition-all hover:scale-105 ${
-                          isSelected 
-                            ? "bg-green-500 text-black font-bold shadow-lg shadow-green-900/20" 
+                        className={`badge badge-lg border-none cursor-pointer transition-all hover:scale-105 ${isSelected
+                            ? "bg-green-500 text-black font-bold shadow-lg shadow-green-900/20"
                             : "bg-white/10 text-gray-400 hover:bg-white/20"
-                        }`}
+                          }`}
                       >
                         {hora}
                       </button>

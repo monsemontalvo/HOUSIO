@@ -44,6 +44,9 @@ const Navbar = () => {
     navigate('/');
   };
 
+  // Filtramos las notificaciones para ver si hay alguna de tipo 'mensaje' que no haya sido leída
+  const tieneMensajesNuevos = notificaciones.some(n => n.tipo === 'mensaje' && !n.leida);
+
   return (
     <div className="navbar fixed top-0 w-full z-50 px-2 sm:px-8 h-16 bg-neutral-950/80 backdrop-blur-md border-b border-white/10 shadow-lg transition-all flex-nowrap">
       <div className="flex-1 min-w-0">
@@ -67,8 +70,9 @@ const Navbar = () => {
             <Link to="/chat" className="btn btn-ghost btn-circle btn-sm sm:btn-md text-gray-400 hover:text-white hover:bg-white/10">
               <div className="indicator">
                 <MessageSquare className="size-5" />
-                <span className="badge badge-xs badge-primary indicator-item bg-blue-500 border-none scale-75 sm:scale-100"></span>
-              </div>
+                {tieneMensajesNuevos && (
+                  <span className="badge badge-xs badge-primary indicator-item bg-blue-500 border-none scale-75 sm:scale-100"></span>
+                )}              </div>
             </Link>
 
             <Link to="/help" className="btn btn-ghost btn-circle btn-sm sm:btn-md text-gray-400 hover:text-white hover:bg-white/10">
@@ -104,7 +108,7 @@ const Navbar = () => {
                         else if (notif.tipo === 'mensaje') {
                           // El referenciaId ahora es el ID del usuario que mandó el mensaje
                           navigate(`/chat`);
-                          
+
                         }
                         else if (notif.tipo === 'visita') {
                           navigate(`/visits`);
