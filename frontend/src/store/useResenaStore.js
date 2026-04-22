@@ -34,4 +34,21 @@ export const useResenaStore = create((set, get) => ({
       set({ isLoading: false });
     }
   },
+
+  actualizarResena: async (resenaId, data) => {
+    set({ isLoading: true });
+    try {
+      const res = await axiosInstance.put(`/resenas/${resenaId}`, data);
+      set((state) => ({
+        resenas: state.resenas.map((r) => (r._id === resenaId ? res.data : r)),
+      }));
+      toast.success("Reseña actualizada");
+      return true;
+    } catch (error) {
+      toast.error("Error al editar la reseña");
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 }));

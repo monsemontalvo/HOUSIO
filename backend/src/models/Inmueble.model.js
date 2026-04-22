@@ -18,7 +18,8 @@ const inmuebleSchema = new mongoose.Schema({
   horariosVisita: [{ type: String }],
   servicios: [{ type: mongoose.Schema.Types.ObjectId, ref: "Servicio" }],
   amenidades: [{ type: mongoose.Schema.Types.ObjectId, ref: "Amenidad" }],
-  reglas: [{ type: mongoose.Schema.Types.ObjectId, ref: "Regla" }]
+  reglas: [{ type: mongoose.Schema.Types.ObjectId, ref: "Regla" }],
+  clicks: { type: Number, default: 0 }
 }, { timestamps: true });
 
 const Inmueble = mongoose.model("Inmueble", inmuebleSchema);

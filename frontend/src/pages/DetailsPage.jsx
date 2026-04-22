@@ -4,7 +4,7 @@ import {
   MapPin, Star, Shield, ArrowLeft, Loader,
   CheckCircle, Home, AlertCircle, Zap,
   X, Clock, Bus, BusFront, Footprints,
-  University,
+  University, Pencil 
 } from 'lucide-react';
 import { useInmuebleStore } from '../store/useInmuebleStore';
 import { useAuthStore } from '../store/useAuthStore';
@@ -21,7 +21,8 @@ const DetailsPage = () => {
   const navigate = useNavigate();
   const { currentInmueble, getInmuebleById, isLoading: loadingInmueble } = useInmuebleStore();
   const { authUser } = useAuthStore();
-  const { resenas, getResenas, crearResena, isLoading: loadingResena } = useResenaStore();
+  // <-- Se agregó actualizarResena
+  const { resenas, getResenas, crearResena, actualizarResena, isLoading: loadingResena } = useResenaStore();
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -37,6 +38,7 @@ const DetailsPage = () => {
   const { setSelectedUser, enviarMensaje } = useChatStore();
 
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [editingResenaId, setEditingResenaId] = useState(null); // <-- Estado para saber si editamos
   const [rating, setRating] = useState(5);
   const [comentario, setComentario] = useState("");
 
@@ -194,20 +196,30 @@ const DetailsPage = () => {
     : "0.0";
   const estrellasLlenas = Math.round(Number(promedio));
 
+  // <-- Modificado para soportar tanto creación como edición
   const handleSubmitResena = async (e) => {
     e.preventDefault();
     if (!comentario.trim()) {
       return toast.error("Por favor escribe un comentario");
     }
 
-    const success = await crearResena({
-      inmuebleId: id,
-      texto: comentario,
-      calificacion: rating
-    });
+    let success;
+    if (editingResenaId) {
+      success = await actualizarResena(editingResenaId, {
+        texto: comentario,
+        calificacion: rating
+      });
+    } else {
+      success = await crearResena({
+        inmuebleId: id,
+        texto: comentario,
+        calificacion: rating
+      });
+    }
 
     if (success) {
       setIsReviewModalOpen(false);
+      setEditingResenaId(null);
       setComentario("");
       setRating(5);
     }
@@ -486,23 +498,42 @@ const DetailsPage = () => {
           <div className="space-y-6">
             {resenas?.map((resena) => (
               <div key={resena._id} className="border-b border-white/5 pb-6 last:border-none">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="avatar">
-                    <div className="w-10 h-10 rounded-full bg-black/50">
-                      <img src={resena.autor?.profilePic || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"}
-                        alt="User"
-                        className="w-full h-full object-cover"
-                      />
+                {/* <-- Modificado para agregar el botón de Editar con diseño flex justify-between --> */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="avatar">
+                      <div className="w-10 h-10 rounded-full bg-black/50">
+                        <img src={resena.autor?.profilePic || "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"}
+                          alt="User"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white capitalize">{resena.autor?.fullName || "Usuario"}</h4>
+                      <div className="flex text-orange-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={`size-3 ${i < resena.calificacion ? 'fill-current' : ''}`} />
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <h4 className="font-bold text-white capitalize">{resena.autor?.fullName || "Usuario"}</h4>
-                    <div className="flex text-orange-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`size-3 ${i < resena.calificacion ? 'fill-current' : ''}`} />
-                      ))}
-                    </div>
-                  </div>
+
+                  {/* <-- Lógica para que solo el autor vea el botón de Editar --> */}
+                  {(resena.autor?._id === authUser?._id || resena.autor === authUser?._id) && (
+                    <button 
+                      onClick={() => {
+                        setEditingResenaId(resena._id);
+                        setComentario(resena.texto);
+                        setRating(resena.calificacion);
+                        setIsReviewModalOpen(true);
+                      }}
+                      className="text-gray-500 hover:text-orange-500 transition-colors p-2"
+                      title="Editar mi reseña"
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                  )}
                 </div>
                 <p className="text-gray-400 leading-relaxed italic">"{resena.texto}"</p>
               </div>
@@ -517,7 +548,8 @@ const DetailsPage = () => {
 
       <div className={`modal ${isReviewModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box bg-neutral-900 border border-white/10 text-white max-w-md">
-          <h3 className="font-bold text-2xl mb-2">Tu opinión importa</h3>
+          {/* <-- Título dinámico --> */}
+          <h3 className="font-bold text-2xl mb-2">{editingResenaId ? "Editar tu reseña" : "Tu opinión importa"}</h3>
           <p className="text-gray-400 text-sm mb-6">Califica tu experiencia en esta propiedad.</p>
 
           <form onSubmit={handleSubmitResena} className="space-y-6">
@@ -549,6 +581,7 @@ const DetailsPage = () => {
                 className="btn btn-ghost"
                 onClick={() => {
                   setIsReviewModalOpen(false);
+                  setEditingResenaId(null); // <-- Limpiamos el estado
                   setComentario("");
                   setRating(5);
                 }}
@@ -560,7 +593,8 @@ const DetailsPage = () => {
                 className="btn bg-orange-600 text-white border-none hover:bg-orange-700"
                 disabled={loadingResena}
               >
-                {loadingResena ? <Loader className="animate-spin size-5" /> : 'Publicar Reseña'}
+                {/* <-- Texto del botón dinámico --> */}
+                {loadingResena ? <Loader className="animate-spin size-5" /> : (editingResenaId ? 'Actualizar Reseña' : 'Publicar Reseña')}
               </button>
             </div>
           </form>

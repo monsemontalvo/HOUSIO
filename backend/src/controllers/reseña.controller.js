@@ -56,3 +56,34 @@ export const obtenerResenasPorInmueble = async (req, res) => {
     res.status(500).json({ message: "Error interno del servidor" });
   }
 };
+
+// --- ACTUALIZAR UNA RESEÑA ---
+export const actualizarResena = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { texto, calificacion } = req.body;
+    const autorId = req.user._id;
+
+    const resena = await Resena.findById(id);
+
+    if (!resena) return res.status(404).json({ message: "Reseña no encontrada" });
+
+    // Validar que el autor sea el mismo que intenta editar
+    if (resena.autor.toString() !== autorId.toString()) {
+      return res.status(403).json({ message: "No autorizado para editar esta reseña" });
+    }
+
+    resena.texto = texto || resena.texto;
+    resena.calificacion = calificacion || resena.calificacion;
+
+    await resena.save();
+    
+    // Devolvemos la reseña poblada para actualizar el estado del frontend
+    const resenaActualizada = await Resena.findById(id).populate("autor", "fullName profilePic");
+
+    res.status(200).json(resenaActualizada);
+  } catch (error) {
+    console.log("Error en actualizarResena:", error.message);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+};
