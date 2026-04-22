@@ -1,0 +1,22 @@
+{
+  "name": "housio",
+  "version": "1.0.0",
+  "description": "A web application designed to help students relocating to a new city find the perfect home. This project is developed for the Web Programming II course at FCFM, UANL.\r --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "Start": "npm run start --prefix backend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/monsemontalvo/HOUSIO.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/monsemontalvo/HOUSIO/issues"
+  },
+  "homepage": "https://github.com/monsemontalvo/HOUSIO#readme"
+}

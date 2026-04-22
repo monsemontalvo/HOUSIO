@@ -13,12 +13,15 @@ import mensajeRoutes from "./routes/mensaje.route.js";
 import resenaRoutes from "./routes/reseña.route.js";
 import { app, server } from "./lib/socket.js";
 import cors from "cors"; 
+
+import path from "path";
+
 dotenv.config(); //dotenv.config() carga las variables de entorno definidas en el archivo .env para que estén disponibles en process.env
 //const app = express(); //app es la instancia del servidor Express que se va a configurar y ejecutar.
 
 //PORT se obtiene de las variables de entorno para que el servidor pueda usar el puerto asignado por el entorno de producción 
 const PORT = process.env.PORT;
-
+const __dirname = path.resolve();
 
 // Configuración de CORS
 app.use(cors({
@@ -46,6 +49,15 @@ app.use("/api/notificaciones", notificacionRoutes);
   console.log(`Server is running on port ${PORT}`);
   connectDB();
 }); */
+
+if(process.env.NODE_ENV==="production"){
+  app.use(express.staic(path.join(__dirname, "../frontend/dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../fronted", "dist", "index.html"));
+  })
+}
+
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
